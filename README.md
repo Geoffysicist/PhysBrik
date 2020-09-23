@@ -4,4 +4,4 @@ Small robust microcontroller and sensors for conductinh high school physics inve
 
 Might be able to implement this in circuitpython see [this stuff](https://learn.adafruit.com/circuitpython-ble-wireless-morse-code-chat?view=all#overview)
 
-Also perhaps use an [Adafruit CLUE](https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/bluefruit-nrf52-api)
+Also perhaps use an [Adafruit CLUE](https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/bluefruit-nrf52-api) with [this guide to the use of bluetooth](https://learn.adafruit.com/bluefruit-nrf52-feather-learning-guide/bluefruit-nrf52-api)

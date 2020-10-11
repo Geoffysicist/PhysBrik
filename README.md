@@ -9,4 +9,5 @@ Web app is [here on glitch](https://glitch.com/edit/#!/physbryk)
 For the Arduino version see [PhysBrykC](https://github.com/Geoffysicist/PhysBrykC)
 
 TODO documentation - see [Circuitpython Design Guide](https://circuitpython.readthedocs.io/en/latest/docs/design_guide.html)
+TODO generate [UUID](https://docs.python.org/3.8/library/uuid.html#module-uuid)
 

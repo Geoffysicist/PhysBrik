@@ -10,3 +10,8 @@ For the Arduino version see [PhysBrykC](https://github.com/Geoffysicist/PhysBryk
 
 TODO documentation - see [Circuitpython Design Guide](https://circuitpython.readthedocs.io/en/latest/docs/design_guide.html)
 
+Adafruit Services:
+
+0x200 AccelerometerService
+
+

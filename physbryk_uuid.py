@@ -2,10 +2,6 @@ import uuid
 
 DEBUG = True
 
-base_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, 'https://github.com/Geoffysicist/PhysBrykPy')
-base_uuid = str(base_uuid)
-base_uuid = base_uuid.replace(base_uuid[19:23],"0000")
-service_uuid = base_uuid.replace(base_uuid[19:20],"01")
 
 def baseUUID(url):
     """generates a base uuid from a url.
@@ -74,9 +70,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-# print(base_uuid)
-# print(2, this_uuid, type(this_uuid))
-# this_uuid = this_uuid.replace('bc84', '0000')
-# print(3, this_uuid, type(this_uuid))
-# this_uuid = uuid.UUID(this_uuid)
-# print(5, this_uuid, type(this_uuid))

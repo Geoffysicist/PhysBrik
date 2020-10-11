@@ -59,4 +59,10 @@ def function_name(required_variable, optional_variable=None):
     """
     return None
 
-    
+
+
+def main():
+    pass
+
+if __name__ == "__main__":
+    main() 

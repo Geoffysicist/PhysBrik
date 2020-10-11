@@ -2,17 +2,6 @@
 #
 # SPDX-License-Identifier: Unlicense
 
-*.mpy
-.idea
-__pycache__
-_build
-*.pyc
-.env
-.python-version
-build*/
-bundles
-*.DS_Store
-.eggs
-dist
-**/*.egg-info
-.vscode
+python:
+    version: 3
+requirements_file: requirements.txt

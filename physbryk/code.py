@@ -1,6 +1,7 @@
 # Adafruit Service demo for Adafruit Feather Bluefruit Sense board.
 # Accessible via Adafruit Web Bluetooth Dashboard.
 # (As of this writing, not yet accessible via Bluefruit Playground app.)
+# https://circuitpython.readthedocs.io/projects/ble_adafruit/en/stable/index.html
 
 import time
 
@@ -30,8 +31,9 @@ from adafruit_ble_adafruit.humidity_service import HumidityService
 from adafruit_ble_adafruit.light_sensor_service import LightSensorService
 from adafruit_ble_adafruit.microphone_service import MicrophoneService
 from adafruit_ble_adafruit.temperature_service import TemperatureService
+from adafruit_ble_adafruit.gyroscope_service import GyroscopeService
 
-# Accelerometer
+# Accelerometer and gyro
 lsm6ds33 = adafruit_lsm6ds.lsm6ds33.LSM6DS33(board.I2C())
 # Used for pressure and temperature.
 bmp280 = adafruit_bmp280.Adafruit_BMP280_I2C(board.I2C())
@@ -50,6 +52,10 @@ mic = audiobusio.PDMIn(
 accel_svc = AccelerometerService()
 accel_svc.measurement_period = 100
 accel_last_update = 0
+
+gyro_svc = GyroscopeService()
+gyro_svc.measurement_period = 100
+gyro_last_update = 0
 
 # Feather Bluefruit Sense has just one board pixel. 3 RGB bytes * 1 pixel
 NEOPIXEL_BUF_LENGTH = 3 * 1
@@ -87,6 +93,7 @@ temp_svc = TemperatureService()
 temp_svc.measurement_period = 100
 temp_last_update = 0
 
+
 ble = BLERadio()
 # The Web Bluetooth dashboard identifies known boards by their
 # advertised name, not by advertising manufacturer data.
@@ -113,6 +120,10 @@ while True:
         if now_msecs - accel_last_update >= accel_svc.measurement_period:
             accel_svc.acceleration = lsm6ds33.acceleration
             accel_last_update = now_msecs
+
+        if now_msecs - gyro_last_update >= gyro_svc.measurement_period:
+            gyro_svc.gyro = lsm6ds33.gyro
+            gyro_last_update = now_msecs
 
         if now_msecs - baro_last_update >= baro_svc.measurement_period:
             baro_svc.pressure = bmp280.pressure

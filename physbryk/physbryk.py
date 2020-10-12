@@ -1,9 +1,4 @@
-"""Module1 - A one line summary of the module or program, terminated by a period.
-
-Leave one blank line.  The rest of this docstring should contain an
-overall description of the module or program.  Optionally, it may also
-contain a brief description of exported classes and functions and/or usage
-examples.
+"""PhysBryk module.
 
   Typical usage example:
 
@@ -12,17 +7,35 @@ examples.
   bar = foo.public_method(required_variable, optional_variable=42)
 """
 
-import uuid
+DEBUG = True
+BASE_UUID = 'a0d1839c-0eaa-5b52-0000-818888dc7dc5'
+
+import adafruit_lsm6ds.lsm6ds33
+import board
+import random as rn
+import time
+
+from adafruit_ble_adafruit.adafruit_service import AdafruitServerAdvertisement
+
 from adafruit_ble.characteristics import Characteristic
 from adafruit_ble.characteristics.int import Int32Characteristic, Uint32Characteristic
 from adafruit_ble.services import Service
 from adafruit_ble.attributes import Attribute
+from adafruit_ble import BLERadio
 
+from adafruit_ble_adafruit.accelerometer_service import AccelerometerService
 
-DEBUG = True
+# Create and initialize the available services.
+accel_svc = AccelerometerService()
+accel_svc.measurement_period = 100
+# accel_last_update = 0
+
+ble = BLERadio()
+ble.name = "PhysBryk"
+adv = AdafruitServerAdvertisement()
 
 class PhysBrykService(Service): # does this have to be a service?
-    """Common superclass for all Adafruit board services."""
+    """Common superclass for all PhysBryk board services."""
 
     @staticmethod
     # def adafruit_service_uuid(n):
@@ -31,28 +44,8 @@ class PhysBrykService(Service): # does this have to be a service?
     #     """
     #     return VendorUUID("ADAF{:04x}-C332-42A8-93BD-25E905756CB8".format(n))
 
-    def baseUUID(url='https://github.com/Geoffysicist/PhysBrykPy'):
-        """generates a base uuid from a url.
-
-        the third 4 digit sequence is set to 0x0000
-        the first 2 digit of this sequence will be used for service uuids
-        the last will be used for characteristic uuids
-
-        Args:
-            url (string)
-
-        Returns:
-            base_uuid (uuid)
-        """
-        base_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, url)
-        base_uuid = str(base_uuid)
-        base_uuid = base_uuid.replace(base_uuid[19:23],"0000")
-        base_uuid = uuid.UUID(base_uuid)
-        if DEBUG: print(base_uuid, type(base_uuid))
-        return base_uuid
-
     @staticmethod
-    def serviceUUID(base_uuid, service_id):
+    def service_uuid(service_id):
         """generates a service uuid from a base uuid.
 
         the first 2 digits of the third 4 digit sequence is set to service_id
@@ -65,10 +58,9 @@ class PhysBrykService(Service): # does this have to be a service?
             service_uuid (uuid)
         """
         
-        service_uuid = str(base_uuid)
         service_uuid = service_uuid[:19] + f'{service_id:02x}' + service_uuid[21:]
         if DEBUG: print(service_uuid, type(service_uuid))
-        service_uuid = uuid.UUID(service_uuid)
+        service_uuid = VendorUUID(service_uuid)
         if DEBUG: print(service_uuid, type(service_uuid))
         return service_uuid
 
@@ -119,79 +111,51 @@ class PhysBrykService(Service): # does this have to be a service?
         if DEBUG: print(svc, type(svc))
         return svc
 
-
-
-
-
-def baseUUID(url='https://github.com/Geoffysicist/PhysBrykPy'):
-    """generates a base uuid from a url.
-
-    the third 4 digit sequence is set to 0x0000
-    the first 2 digit of this sequence will be used for service uuids
-    the last will be used for characteristic uuids
-
-    Args:
-        url (string)
-
-    Returns:
-        base_uuid (uuid)
+class mock_sensor(object):
+    """Creates a mock sensor for debigging off the microcontroller.
     """
 
-    base_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, url)
-    base_uuid = str(base_uuid)
-    base_uuid = base_uuid.replace(base_uuid[19:23],"0000")
-    base_uuid = uuid.UUID(base_uuid)
-    if DEBUG: print(base_uuid, type(base_uuid))
-    return base_uuid
+    def __init__(self, likes_spam=False):
+        self.acceleration = (0, 0, 0)
+        self.update()
 
-def serviceUUID(service_id, base_uuid=baseUUID()):
-    """generates a service uuid from a base uuid.
+    def update(self):
+        """updates all the sensor values
+        """
+        self.acceleration = (rn.randrange(16), rn.randrange(16), rn.randrange(16))
 
-    the first 2 digits of the third 4 digit sequence is set to service_id
-    the last will be used for characteristic uuids
-
-    Args:
-        base_uuid (uuid)
-        service_id (hex int between 0x01 and 0xEE)
-
-    Returns: 
-        service_uuid (uuid)
-    """
-
-    service_uuid = str(base_uuid)
-    service_uuid = service_uuid[:19] + f'{service_id:02x}' + service_uuid[21:]
-    if DEBUG: print(service_uuid, type(service_uuid))
-    service_uuid = uuid.UUID(service_uuid)
-    if DEBUG: print(service_uuid, type(service_uuid))
-    return service_uuid
-
-def characteristicUUID(service_uuid, characteristic_id):
-    """generates a characteristic uuid from a service uuid.
-
-    the last 2 digits of the third 4 digit sequence is set to service_id
-    
-    Args:
-        service_uuid (uuid)
-        characteristic_id (hex int between 0x01 and 0xEE)
-
-    Returns:
-        characteristic_uuid (uuid)
-    """
-
-    characteristic_uuid = str(service_uuid)
-    characteristic_uuid = characteristic_uuid[:21] + f'{characteristic_id:02x}' + characteristic_uuid[23:]
-    if DEBUG: print(characteristic_uuid, type(characteristic_uuid))
-    characteristic_uuid = uuid.UUID(characteristic_uuid)
-    if DEBUG: print(characteristic_uuid, type(characteristic_uuid))
-    return characteristic_uuid
-
+if DEBUG: #use mock sensors
+    lsm6ds33 = mock_sensor()
+else:
+    # Accelerometer and gyro
+    lsm6ds33 = adafruit_lsm6ds.lsm6ds33.LSM6DS33(board.I2C())
 
 def main():
-    this_base_uuid = PhysBrykService.baseUUID()
-    this_service_uuid = PhysBrykService.serviceUUID(this_base_uuid, 0x01)
-    this_characteristic_uuid = PhysBrykService.characteristicUUID(this_service_uuid, 0x0e)
-    PhysBrykService.measurement_period_charac()
-    PhysBrykService.service_version_charac()
+
+    accel_last_update = 0
+
+    while True:
+        # Advertise when not connected.
+        ble.start_advertising(adv)
+        if DEBUG: print('Connecting...')
+        while not ble.connected:
+            pass
+        ble.stop_advertising()
+        if DEBUG:
+                print('Connected!')
+                print(accel_last_update)
+                print(accel_svc.measurement_period)
+        
+        while ble.connected:
+            now_msecs = time.monotonic_ns() // 1000000  # pylint: disable=no-member
+
+            if now_msecs - accel_last_update >= accel_svc.measurement_period:
+                accel_svc.acceleration = lsm6ds33.acceleration
+                if DEBUG: lsm6ds33.update()
+                accel_last_update = now_msecs
+                
+
+
 
 if __name__ == "__main__":
     main()

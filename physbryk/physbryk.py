@@ -7,13 +7,21 @@
   bar = foo.public_method(required_variable, optional_variable=42)
 """
 
-DEBUG = True
-BASE_UUID = 'a0d1839c-0eaa-5b52-0000-818888dc7dc5'
+# DEBUG = True
+# BOARD = True #flag indicating whether attached to a board.
+# BASE_UUID = 'a0d1839c-0eaa-5b52-0000-818888dc7dc5'
 
-import adafruit_lsm6ds.lsm6ds33
-import board
-import random as rn
-import time
+# try:
+#     import board
+# except NotImplementedError:
+#     # no board attached so mock sensors, services etc
+#     import mock as mk
+#     print('No valid board. Using mock sensors and services')
+#     BOARD = False
+
+
+# import adafruit_lsm6ds.lsm6ds33
+# import time
 
 from adafruit_ble_adafruit.adafruit_service import AdafruitServerAdvertisement
 
@@ -24,15 +32,6 @@ from adafruit_ble.attributes import Attribute
 from adafruit_ble import BLERadio
 
 from adafruit_ble_adafruit.accelerometer_service import AccelerometerService
-
-# Create and initialize the available services.
-accel_svc = AccelerometerService()
-accel_svc.measurement_period = 100
-# accel_last_update = 0
-
-ble = BLERadio()
-ble.name = "PhysBryk"
-adv = AdafruitServerAdvertisement()
 
 class PhysBrykService(Service): # does this have to be a service?
     """Common superclass for all PhysBryk board services."""
@@ -111,26 +110,43 @@ class PhysBrykService(Service): # does this have to be a service?
         if DEBUG: print(svc, type(svc))
         return svc
 
-class mock_sensor(object):
-    """Creates a mock sensor for debigging off the microcontroller.
-    """
-
-    def __init__(self, likes_spam=False):
-        self.acceleration = (0, 0, 0)
-        self.update()
-
-    def update(self):
-        """updates all the sensor values
-        """
-        self.acceleration = (rn.randrange(16), rn.randrange(16), rn.randrange(16))
-
-if DEBUG: #use mock sensors
-    lsm6ds33 = mock_sensor()
-else:
-    # Accelerometer and gyro
-    lsm6ds33 = adafruit_lsm6ds.lsm6ds33.LSM6DS33(board.I2C())
-
 def main():
+    DEBUG = True
+    BOARD = True #flag indicating whether attached to a board.
+    BASE_UUID = 'a0d1839c-0eaa-5b52-0000-818888dc7dc5'
+
+    try:
+        import board
+    except NotImplementedError:
+        # no board attached so mock sensors, services etc
+        import mock as mk
+        print('No valid board. Using mock sensors and services')
+        BOARD = False
+
+
+    import adafruit_lsm6ds.lsm6ds33
+    import time
+
+    if BOARD: #valid board present
+        # Accelerometer and gyro
+        lsm6ds33 = adafruit_lsm6ds.lsm6ds33.LSM6DS33(board.I2C())
+        
+        # Create and initialize the available services.
+        accel_svc = AccelerometerService()
+        ble = BLERadio()
+        adv = AdafruitServerAdvertisement()
+
+    else: #use mock sensors and services
+        
+        # Accelerometer and gyro
+        lsm6ds33 = mk.Sensor()
+
+        ble = mk.Service()
+        accel_svc = mk.Service()
+        adv = mk.Service()
+
+    ble.name = "PhysBryk"
+    accel_svc.measurement_period = 100 # millis
 
     accel_last_update = 0
 
@@ -143,18 +159,17 @@ def main():
         ble.stop_advertising()
         if DEBUG:
                 print('Connected!')
-                print(accel_last_update)
-                print(accel_svc.measurement_period)
         
         while ble.connected:
             now_msecs = time.monotonic_ns() // 1000000  # pylint: disable=no-member
 
             if now_msecs - accel_last_update >= accel_svc.measurement_period:
                 accel_svc.acceleration = lsm6ds33.acceleration
-                if DEBUG: lsm6ds33.update()
                 accel_last_update = now_msecs
-                
 
+                if DEBUG: print(accel_svc.acceleration)
+                if not BOARD:
+                    for s in mk.sensors: s.update()
 
 
 if __name__ == "__main__":

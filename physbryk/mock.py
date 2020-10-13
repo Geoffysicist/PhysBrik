@@ -23,6 +23,10 @@ class Sensor(object):
         self.name = "Mock_Sensor"
         self.acceleration = ()
         self.gyro = ()
+        self.magnetic = ()
+        self.intensity = 0
+        self.spectrum = ()
+        self.proximity = ()
         self.update()
 
         sensors.append(self)
@@ -31,7 +35,10 @@ class Sensor(object):
         """updates all the sensor values
         """
         self.acceleration = (rn.randrange(16), rn.randrange(16), rn.randrange(16))
-        self.gyro = (rn.randrange(16), rn.randrange(16), rn.randrange(16))
+        self.gyro = (rn.randrange(255), rn.randrange(255), rn.randrange(255))
+        self.magnetic = (rn.randrange(255), rn.randrange(255), rn.randrange(255))
+        self.color_data = (rn.randrange(255), rn.randrange(255), rn.randrange(255),rn.randrange(255))
+        self.proximity = rn.randrange(100)
 
 class Service(object):
     """Creates a mock service for debugging off the microcontroller.
@@ -42,6 +49,11 @@ class Service(object):
         self.connected = False
         self.measurement_period = 1000
         self.acceleration = ()
+        self.gyro = ()
+        self.magnetic = ()
+        self.intensity = 0
+        self.spectrum = ()
+        self.proximity = ()
         self.update()
 
     def update(self):

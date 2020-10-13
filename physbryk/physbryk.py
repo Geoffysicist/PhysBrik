@@ -37,29 +37,7 @@ from adafruit_ble import BLERadio
 
 from adafruit_ble_adafruit.adafruit_service import AdafruitService
 # from adafruit_ble_adafruit.accelerometer_service import AccelerometerService
-
-class IMUService(AdafruitService):  # pylint: disable=too-few-public-methods
-    """Accelerometer and Gyroscope values."""
-
-    uuid = AdafruitService.adafruit_service_uuid(0x200)
-    acceleration = StructCharacteristic(
-        "<fff",
-        uuid=AdafruitService.adafruit_service_uuid(0x201),
-        properties=(Characteristic.READ | Characteristic.NOTIFY),
-        write_perm=Attribute.NO_ACCESS,
-    )
-    """Tuple (x, y, z) float acceleration values, in m/s^2"""
-
-    gyro = StructCharacteristic(
-        "<fff",
-        uuid=AdafruitService.adafruit_service_uuid(0x202),
-        properties=(Characteristic.READ | Characteristic.NOTIFY),
-        write_perm=Attribute.NO_ACCESS,
-    )
-    """Tuple (x, y, z) float gyroscope values, in rad/s"""
-    measurement_period = AdafruitService.measurement_period_charac()
-    """Initially 1000ms."""
-
+MEASUREMENT_PERIOD = 100
 
 class PhysBrykService(Service): # does this have to be a service?
     """Common superclass for all PhysBryk board services."""
@@ -73,7 +51,7 @@ class PhysBrykService(Service): # does this have to be a service?
         return VendorUUID('a0d1{:04x}-0eaa-5b52-bc84-818888dc7dc5'.format(n))
 
     @classmethod
-    def measurement_period_charac(cls, msecs=1000):
+    def measurement_period_charac(cls, msecs=MEASUREMENT_PERIOD):
         """Create a measurement_period Characteristic for use by a subclass."""
         return Int32Characteristic(
             uuid=cls.physbryk_service_uuid(0x0001),
@@ -90,6 +68,30 @@ class PhysBrykService(Service): # does this have to be a service?
             write_perm=Attribute.NO_ACCESS,
             initial_value=version,
         )
+
+class IMUService(PhysBrykService):  # pylint: disable=too-few-public-methods
+    """Accelerometer and Gyroscope values."""
+
+    uuid = PhysBrykService.physbryk_service_uuid(0x200)
+    acceleration = StructCharacteristic(
+        "<fff",
+        uuid=PhysBrykService.physbryk_service_uuid(0x201),
+        properties=(Characteristic.READ | Characteristic.NOTIFY),
+        write_perm=Attribute.NO_ACCESS,
+    )
+    """Tuple (x, y, z) float acceleration values, in m/s^2"""
+
+    gyro = StructCharacteristic(
+        "<fff",
+        uuid=PhysBrykService.physbryk_service_uuid(0x202),
+        properties=(Characteristic.READ | Characteristic.NOTIFY),
+        write_perm=Attribute.NO_ACCESS,
+    )
+    """Tuple (x, y, z) float gyroscope values, in rad/s"""
+    measurement_period = PhysBrykService.measurement_period_charac()
+    """Initially 1000ms."""
+
+
 
 class DummyService(AdafruitService):  # pylint: disable=too-few-public-methods
     """Accelerometer values."""
@@ -159,7 +161,7 @@ def main():
         
         # Create and initialize the available services.
         imu_svc = IMUService()
-        dummy_svc = DummyService()
+        dummy_svc = _DummyService()
         ble = BLERadio()
         adv = AdafruitServerAdvertisement()
 
@@ -178,8 +180,7 @@ def main():
     # accel_svc.measurement_period = 100 # millis
 
     last_update = 0
-    measurement_period = 1000
-
+    
 
     while True:
         # Advertise when not connected.
@@ -194,7 +195,7 @@ def main():
         while ble.connected:
             now_msecs = time.monotonic_ns() // 1000000  # pylint: disable=no-member
 
-            if now_msecs - last_update >= measurement_period:
+            if now_msecs - last_update >= MEASUREMENT_PERIOD:
                 imu_svc.acceleration = lsm6ds33.acceleration
                 imu_svc.gyro = lsm6ds33.gyro
                 dummy_svc.value = dummy_sensor.value

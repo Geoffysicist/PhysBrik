@@ -22,6 +22,7 @@ class Sensor(object):
     def __init__(self, likes_spam=False):
         self.name = "Mock_Sensor"
         self.acceleration = ()
+        self.gyro = ()
         self.update()
 
         sensors.append(self)
@@ -30,6 +31,7 @@ class Sensor(object):
         """updates all the sensor values
         """
         self.acceleration = (rn.randrange(16), rn.randrange(16), rn.randrange(16))
+        self.gyro = (rn.randrange(16), rn.randrange(16), rn.randrange(16))
 
 class Service(object):
     """Creates a mock service for debugging off the microcontroller.

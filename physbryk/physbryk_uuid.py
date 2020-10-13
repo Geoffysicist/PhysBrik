@@ -16,6 +16,7 @@ def baseUUID(url):
     """
 
     base_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, url)
+    print(base_uuid)
     base_uuid = str(base_uuid)
     base_uuid = base_uuid.replace(base_uuid[19:23],"0000")
     base_uuid = uuid.UUID(base_uuid)

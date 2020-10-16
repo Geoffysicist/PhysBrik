@@ -3,12 +3,14 @@ Services & Characteristics
 MotionService       100
     acceleration    101
     gyro            102
-MagnetometerService 200
-    magnetic        201
+MagnetService 200
+    magnet        201
 EMRService          300
     intensity       301
     spectrum        302
     proximity       303
+DummyService        1000
+    value           1001
     
 
 Base uuid for PhysBryk is a0d1nnnn-0eaa-5b52-bc84-818888dc7dc5
@@ -42,6 +44,7 @@ from adafruit_ble_adafruit.adafruit_service import AdafruitService
 _MANUFACTURING_DATA_ADT = const(0xFF)
 _ADAFRUIT_COMPANY_ID = const(0x0822)
 _PID_DATA_ID = const(0x0001)  # This is the same as the Radio data id, unfortunately.
+PHYSBRYK_UUID = 'a0d1839c-0eaa-5b52-bc84-818888dc7dc5'
 
 MEASUREMENT_PERIOD = 100
 
@@ -131,11 +134,11 @@ class MotionService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Initially 1000ms."""
 
 
-class MagnetometerService(PhysBrykService):  # pylint: disable=too-few-public-methods
+class MagnetService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Magnetometer values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x200)
-    magnetic = StructCharacteristic(
+    magnet = StructCharacteristic(
         "<fff",
         uuid=PhysBrykService.physbryk_service_uuid(0x201),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
@@ -254,7 +257,7 @@ def main():
     if BOARD: # valid board present use real sensors
         battery = battery = analogio.AnalogIn(board.VOLTAGE_MONITOR)
         motion = adafruit_lsm6ds.lsm6ds33.LSM6DS33(board.I2C())
-        magnetic = adafruit_lis3mdl.LIS3MDL(board.I2C())
+        magnet = adafruit_lis3mdl.LIS3MDL(board.I2C())
         emr = adafruit_apds9960.apds9960.APDS9960(board.I2C())
         # emr.enable_proximity = True
         emr.enable_color = True
@@ -264,7 +267,7 @@ def main():
         ble = BLERadio()
         battery_svc = BatteryService()
         motion_svc = MotionService()
-        magnetic_svc = MagnetometerService()
+        magnet_svc = MagnetService()
         emr_svc = EMRService()
         dummy_svc = DummyService()
         adv = PhysBrykServerAdvertisement()
@@ -273,22 +276,20 @@ def main():
         
         # Accelerometer and gyro
         motion = mk.Sensor()
-        magnetic = mk.Sensor()
+        magnet = mk.Sensor()
         emr = mk.Sensor()
         battery = mk.Sensor()
 
         ble = mk.Service()
         battery_svc = mk.Service()
         motion_svc = mk.Service()
-        magnetic_svc = mk.Service()
+        magnet_svc = mk.Service()
         emr_svc = mk.Service()
         dummy_svc = mk.Service()
         adv = mk.Service()
 
-
     ble.name = "PhysBryk"
-    # accel_svc.measurement_period = 100 # millis
-
+    
     last_update = 0
     
     while True:
@@ -308,7 +309,7 @@ def main():
                 battery_svc.voltage = get_voltage(battery)
                 motion_svc.acceleration = motion.acceleration
                 motion_svc.gyro = motion.gyro
-                magnetic_svc.magnetic = magnetic.magnetic
+                magnet_svc.magnet = magnet.magnet
                 r, g, b, c = emr.color_data
                 emr_svc.intensity = c
                 emr_svc.spectrum = (r, g, b)
@@ -320,7 +321,7 @@ def main():
                 if DEBUG:
                     print(f'motion acceleration: {motion_svc.acceleration}')
                     print(f'motion gyro: {motion_svc.gyro}')
-                    print(f'magnetic magnetic: {magnetic_svc.magnetic}')
+                    print(f'magnet magnet: {magnet_svc.magnet}')
                     print(f'emr intensity: {emr_svc.intensity}')
                     print(f'emr spectrum: {emr_svc.spectrum}')
                     print(f'emr proximity: {emr_svc.proximity}')

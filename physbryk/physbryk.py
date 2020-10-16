@@ -199,8 +199,7 @@ class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x1000)
-    value = StructCharacteristic(
-        "<fff",
+    value = FloatCharacteristic(
         uuid=PhysBrykService.physbryk_service_uuid(0x1001),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
@@ -223,7 +222,7 @@ class DummySensor(object):
     def update(self):
         """updates all the sensor values
         """
-        self.value = (rn.randrange(16), rn.randrange(16), rn.randrange(16))
+        self.value = 42 # rn.randrange(16)
 
 def get_voltage(battery):
     """Determines the voltage according to the value of the voltage monitor"""
@@ -314,7 +313,7 @@ def main():
                 emr_svc.intensity = c
                 emr_svc.spectrum = (r, g, b)
                 emr_svc.proximity = emr.proximity
-                dummy_svc.value = dummy_sensor.value
+                dummy_svc.value = 42
                 dummy_sensor.update()
                 last_update = now_msecs
 

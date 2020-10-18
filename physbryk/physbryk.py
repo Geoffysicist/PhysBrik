@@ -138,7 +138,7 @@ class MagnetService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Magnetometer values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x200)
-    magnet = StructCharacteristic(
+    magnetic = StructCharacteristic(
         "<fff",
         uuid=PhysBrykService.physbryk_service_uuid(0x201),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
@@ -154,8 +154,6 @@ class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Light sensor value."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x300)
-
-    color_data = ()
 
     intensity = FloatCharacteristic(
         # "<f",
@@ -188,20 +186,13 @@ class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Initially 1000ms."""
 
     @classmethod
-    def get_lux(cls):
+    def get_lux(cls, color_data):
         """Calculate ambient light values"""
         #   This only uses RGB ... how can we integrate clear or calculate lux
         #   based exclusively on clear since this might be more reliable?
-        r, g, b, c = cls.color_data
+        r, g, b, c = color_data
         lux = (-0.32466 * r) + (1.57837 * g) + (-0.73191 * b)
         return lux
-
-    @classmethod
-    def get_spectrum(cls):
-        """Return the R G B values as a tuple"""
-        r, g, b, c = cls.color_data
-        return (r, g, b)
-
 
 class BatteryService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""
@@ -284,7 +275,7 @@ def main():
         motion = adafruit_lsm6ds.lsm6ds33.LSM6DS33(board.I2C())
         magnet = adafruit_lis3mdl.LIS3MDL(board.I2C())
         emr = adafruit_apds9960.apds9960.APDS9960(board.I2C())
-        emr.enable_proximity = True
+        # emr.enable_proximity = True
         emr.enable_color = True
 
         
@@ -313,7 +304,7 @@ def main():
         dummy_svc = mk.Service()
         adv = mk.Service()
 
-    ble.name = "PhysBryk"
+    ble.name = "PhysBryk_Alpha"
     
     last_update = 0
     
@@ -336,11 +327,8 @@ def main():
                 motion_svc.gyro = motion.gyro # rad/s
                 magnet_svc.magnetic = magnet.magnetic # microT
 
-                # r, g, b, c = emr.color_data
-                emr_svc.color_data = emr.color_data
-                # emr_svc.intensity = emr_svc.get_lux(r,g,b)
-                emr_svc.intensity = emr_svc.get_lux()
-                emr_svc.spectrum = emr_svc.get_spectrum()
+                emr_svc.intensity = emr_svc.get_lux(emr.color_data)
+                emr_svc.spectrum = emr.color_data
                 emr_svc.proximity = emr.proximity
                 dummy_svc.value = 42
                 dummy_sensor.update()

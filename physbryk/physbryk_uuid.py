@@ -65,6 +65,7 @@ def characteristicUUID(service_uuid, characteristic_id):
 
 def main():
     this_base_uuid = baseUUID('https://github.com/Geoffysicist/PhysBrykPy')
+
     this_service_uuid = serviceUUID(this_base_uuid, 0x01)
     this_characteristic_uuid = characteristicUUID(this_service_uuid, 0x0e)
 

@@ -32,7 +32,7 @@ from micropython import const
 from adafruit_ble.advertising import Advertisement, LazyObjectField
 from adafruit_ble.advertising.standard import ManufacturerData, ManufacturerDataField
 from adafruit_ble.characteristics import Characteristic, StructCharacteristic
-from adafruit_ble.characteristics.int import Int32Characteristic, Uint32Characteristic, Uint16Characteristic
+from adafruit_ble.characteristics.int import Int32Characteristic, Int16Characteristic, Uint32Characteristic, Uint16Characteristic
 from adafruit_ble.characteristics.float import FloatCharacteristic
 from adafruit_ble.uuid import VendorUUID
 from adafruit_ble.services import Service
@@ -46,7 +46,7 @@ _ADAFRUIT_COMPANY_ID = const(0x0822)
 _PID_DATA_ID = const(0x0001)  # This is the same as the Radio data id, unfortunately.
 PHYSBRYK_UUID = 'a0d1839c-0eaa-5b52-bc84-818888dc7dc5'
 
-MEASUREMENT_PERIOD = 100
+MEASUREMENT_PERIOD = 1000
 
 class PhysBrykServerAdvertisement(Advertisement):
     """Advertise the Adafruit company ID and the board USB PID.
@@ -155,22 +155,26 @@ class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
 
     uuid = PhysBrykService.physbryk_service_uuid(0x300)
 
+    color_data = ()
+
     intensity = FloatCharacteristic(
+        # "<f",
         uuid=PhysBrykService.physbryk_service_uuid(0x301),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Uncalibrated light level (float)"""
+    """Calculated valuefrom get_lux (float)"""
 
     spectrum = StructCharacteristic(
-        "<fff",
+        "<ffff",
         uuid=PhysBrykService.physbryk_service_uuid(0x302),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Tuple (r, g, b) red/green/blue color values, each in range 0-65535 (16 bits)"""
+    """Tuple (r, g, b, c) red/green/blue/clear color values, each in range 0-65535 (16 bits)"""
 
     proximity = Uint16Characteristic(
+        # "<H",
         uuid=PhysBrykService.physbryk_service_uuid(0x303),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
@@ -183,17 +187,39 @@ class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
     measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
 
+    @classmethod
+    def get_lux(cls):
+        """Calculate ambient light values"""
+        #   This only uses RGB ... how can we integrate clear or calculate lux
+        #   based exclusively on clear since this might be more reliable?
+        r, g, b, c = cls.color_data
+        lux = (-0.32466 * r) + (1.57837 * g) + (-0.73191 * b)
+        return lux
+
+    @classmethod
+    def get_spectrum(cls):
+        """Return the R G B values as a tuple"""
+        r, g, b, c = cls.color_data
+        return (r, g, b)
+
 
 class BatteryService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x0000)
+
     voltage = FloatCharacteristic(
+        # "<f",
         uuid=PhysBrykService.physbryk_service_uuid(0x0001),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Tuple (x, y, z) random values between 1 and 100"""
+    """Voltage level (float)"""
+
+    @classmethod 
+    def get_voltage(cls, battery_sensor):
+        """Calculates the voltage from the reading of the on board battery sensor."""
+        return (battery_sensor.value * 3.3) / 65536 * 2
 
     measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
@@ -202,7 +228,8 @@ class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x1000)
-    value = FloatCharacteristic(
+    value = Int16Characteristic(
+        # "<h",
         uuid=PhysBrykService.physbryk_service_uuid(0x1001),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
@@ -227,9 +254,6 @@ class DummySensor(object):
         """
         self.value = 42 # rn.randrange(16)
 
-def get_voltage(battery):
-    """Determines the voltage according to the value of the voltage monitor"""
-    return (battery.value * 3.3) / 65536 * 2
 
 def main():
     DEBUG = True
@@ -249,17 +273,18 @@ def main():
     import adafruit_apds9960.apds9960 # EMR
 
     import time
-    import analogio
-
+    
 
     dummy_sensor = DummySensor()
 
     if BOARD: # valid board present use real sensors
-        battery = battery = analogio.AnalogIn(board.VOLTAGE_MONITOR)
+        import analogio
+
+        battery = analogio.AnalogIn(board.VOLTAGE_MONITOR)
         motion = adafruit_lsm6ds.lsm6ds33.LSM6DS33(board.I2C())
         magnet = adafruit_lis3mdl.LIS3MDL(board.I2C())
         emr = adafruit_apds9960.apds9960.APDS9960(board.I2C())
-        # emr.enable_proximity = True
+        emr.enable_proximity = True
         emr.enable_color = True
 
         
@@ -306,13 +331,16 @@ def main():
             now_msecs = time.monotonic_ns() // 1000000  # pylint: disable=no-member
 
             if now_msecs - last_update >= MEASUREMENT_PERIOD:
-                battery_svc.voltage = get_voltage(battery)
-                motion_svc.acceleration = motion.acceleration
-                motion_svc.gyro = motion.gyro
-                magnet_svc.magnet = magnet.magnet
-                r, g, b, c = emr.color_data
-                emr_svc.intensity = c
-                emr_svc.spectrum = (r, g, b)
+                battery_svc.voltage = battery_svc.get_voltage(battery)
+                motion_svc.acceleration = motion.acceleration # m/s/s
+                motion_svc.gyro = motion.gyro # rad/s
+                magnet_svc.magnetic = magnet.magnetic # microT
+
+                # r, g, b, c = emr.color_data
+                emr_svc.color_data = emr.color_data
+                # emr_svc.intensity = emr_svc.get_lux(r,g,b)
+                emr_svc.intensity = emr_svc.get_lux()
+                emr_svc.spectrum = emr_svc.get_spectrum()
                 emr_svc.proximity = emr.proximity
                 dummy_svc.value = 42
                 dummy_sensor.update()
@@ -321,10 +349,11 @@ def main():
                 if DEBUG:
                     print(f'motion acceleration: {motion_svc.acceleration}')
                     print(f'motion gyro: {motion_svc.gyro}')
-                    print(f'magnet magnet: {magnet_svc.magnet}')
+                    print(f'magnet magnet: {magnet_svc.magnetic}')
                     print(f'emr intensity: {emr_svc.intensity}')
                     print(f'emr spectrum: {emr_svc.spectrum}')
                     print(f'emr proximity: {emr_svc.proximity}')
+                    print(f'battery: {battery_svc.voltage}')
                     print(f'dummy: {dummy_svc.value}')
                 if not BOARD:
                     for s in mk.sensors: s.update()

@@ -16,3 +16,5 @@ bundles
 dist
 **/*.egg-info
 .vscode
+.ipynb_checkpoints
+sandpit*

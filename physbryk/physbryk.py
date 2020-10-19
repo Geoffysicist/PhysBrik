@@ -42,11 +42,10 @@ from adafruit_ble import BLERadio
 
 from adafruit_ble_adafruit.adafruit_service import AdafruitService
 
-_MANUFACTURING_DATA_ADT = const(0xFF)
-_ADAFRUIT_COMPANY_ID = const(0x0822)
+# _MANUFACTURING_DATA_ADT = const(0xFF)
+# _ADAFRUIT_COMPANY_ID = const(0x0822)
 # _PID_DATA_ID = const(0x0001)  # This is the same as the Radio data id, unfortunately.
-_PID_DATA_ID = const(0x0000)  # This is the same as the Radio data id, unfortunately.
-PHYSBRYK_UUID = 'a0d1839c-0eaa-5b52-bc84-818888dc7dc5'
+PHYSBRYK_UUID = 'a0d10000-0eaa-5b52-bc84-818888dc7dc5'
 
 MEASUREMENT_PERIOD = 1000
 
@@ -56,30 +55,45 @@ class PhysBrykServerAdvertisement(Advertisement):
     TODO find how to change this from the Adafruit one for a more general advertisement.
     """
 
-    match_prefixes = (
-        struct.pack(
-            "<BHBH",
-            _MANUFACTURING_DATA_ADT,
-            _ADAFRUIT_COMPANY_ID,
-            struct.calcsize("<HH"),
-            _PID_DATA_ID,
-        ),
-    )
-    manufacturer_data = LazyObjectField(
-        ManufacturerData,
-        "manufacturer_data",
-        advertising_data_type=_MANUFACTURING_DATA_ADT,
-        company_id=_ADAFRUIT_COMPANY_ID,
-        key_encoding="<H",
-    )
-    pid = ManufacturerDataField(_PID_DATA_ID, "<H")
-    """The USB PID (product id) for this board."""
+    # match_prefixes = (
+    #     struct.pack(
+    #         "<BHBH",
+    #         _MANUFACTURING_DATA_ADT,
+    #         _ADAFRUIT_COMPANY_ID,
+    #         struct.calcsize("<HH"),
+    #         _PID_DATA_ID,
+    #     ),
+    # )
+    # manufacturer_data = LazyObjectField(
+    #     ManufacturerData,
+    #     "manufacturer_data",
+    #     advertising_data_type=_MANUFACTURING_DATA_ADT,
+    #     company_id=_ADAFRUIT_COMPANY_ID,
+    #     key_encoding="<H",
+    # )
+    # pid = ManufacturerDataField(_PID_DATA_ID, "<H")
+    # """The USB PID (product id) for this board."""
 
     def __init__(self):
         super().__init__()
         self.connectable = True
         self.flags.general_discovery = True
         self.flags.le_only = True
+
+class PhysBryk(object):
+    
+    def __init__(self, device=None):
+        '''device is a PhysBryk BLE device'''
+        self._device = device
+    
+    def setDevice(self, ble_device):
+        self._device = ble_device
+        
+    def getAddress(self):
+        return self._device.address
+
+    def getName(self):
+        return self._device.name
 
 
 class PhysBrykService(Service):
@@ -121,13 +135,22 @@ class PhysBrykService(Service):
             initial_value=version,
         )
 
+class ControlService(PhysBrykService):
+    """TODO."""
+
+    uuid = PhysBrykService.physbryk_service_uuid(0x000)
+
+    measurement_period = Int32Characteristic(
+        uuid=PhysBrykService.physbryk_service_uuid(0x0001),
+        properties=(Characteristic.READ | Characteristic.WRITE),
+        initial_value=MEASUREMENT_PERIOD,
+    )
+    """Initially 1000ms."""
 
 class MotionService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Accelerometer and Gyroscope values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x100)
-
-    name = PhysBrykService.name_charac(name='Motion')
 
     acceleration = StructCharacteristic(
         "<fff",
@@ -144,9 +167,9 @@ class MotionService(PhysBrykService):  # pylint: disable=too-few-public-methods
         write_perm=Attribute.NO_ACCESS,
     )
     """Tuple (x, y, z) float gyroscope values, in rad/s"""
-    measurement_period = PhysBrykService.measurement_period_charac()
-    """Initially 1000ms."""
 
+    # measurement_period = PhysBrykService.measurement_period_charac()
+    """Initially 1000ms."""
 
 class MagnetService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Magnetometer values."""
@@ -162,7 +185,6 @@ class MagnetService(PhysBrykService):  # pylint: disable=too-few-public-methods
     
     measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
-
 
 class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Light sensor value."""
@@ -234,8 +256,6 @@ class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
 
     uuid = PhysBrykService.physbryk_service_uuid(0x1000)
 
-    name = PhysBrykService.name_charac(name='Dummy')
-
     value = Int16Characteristic(
         # "<h",
         uuid=PhysBrykService.physbryk_service_uuid(0x1001),
@@ -244,11 +264,8 @@ class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
     )
     """Tuple (x, y, z) random values between 1 and 100"""
 
-    name = PhysBrykService.name_charac(name='Dummy')
-
-    measurement_period = PhysBrykService.measurement_period_charac()
+    # measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
-
 
 class DummySensor(object):
     """Creates a dummy sensor which generates a tuple of 3 random numbers.

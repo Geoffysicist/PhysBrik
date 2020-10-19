@@ -32,7 +32,7 @@ from micropython import const
 from adafruit_ble.advertising import Advertisement, LazyObjectField
 from adafruit_ble.advertising.standard import ManufacturerData, ManufacturerDataField
 from adafruit_ble.characteristics import Characteristic, StructCharacteristic
-from adafruit_ble.characteristics.int import Int32Characteristic, Int16Characteristic, Uint32Characteristic, Uint16Characteristic
+from adafruit_ble.characteristics.int import Uint8Characteristic, Int32Characteristic, Int16Characteristic, Uint32Characteristic, Uint16Characteristic
 from adafruit_ble.characteristics.float import FloatCharacteristic
 from adafruit_ble.characteristics.string import StringCharacteristic, FixedStringCharacteristic
 from adafruit_ble.uuid import VendorUUID
@@ -95,7 +95,6 @@ class PhysBryk(object):
     def getName(self):
         return self._device.name
 
-
 class PhysBrykService(Service):
     """Common superclass for all PhysBryk board services."""
 
@@ -134,6 +133,41 @@ class PhysBrykService(Service):
             write_perm=Attribute.NO_ACCESS,
             initial_value=version,
         )
+
+class CoreService(PhysBrykService):
+    """Core, 'on-board' charactistics for the physbryk."""
+
+    uuid = PhysBrykService.physbryk_service_uuid(0x000)
+
+    # Default period set by MEASUREMENT_PERIOD.
+    measurement_period = Int32Characteristic(
+        uuid=PhysBrykService.physbryk_service_uuid(0x0001),
+        properties=(Characteristic.READ | Characteristic.WRITE),
+        initial_value=MEASUREMENT_PERIOD,
+    )
+    
+    # motion sensor 0100
+    acceleration_enabled =  Uint8Characteristic(
+        uuid=PhysBrykService.physbryk_service_uuid(0x0100),
+        properties=(Characteristic.READ | Characteristic.WRITE),
+        initial_value=0,
+    )
+    # Tuple (x, y, z) float acceleration values, in m/s^2
+    acceleration = StructCharacteristic(
+        "<fff",
+        uuid=PhysBrykService.physbryk_service_uuid(0x101),
+        properties=(Characteristic.READ | Characteristic.NOTIFY),
+        write_perm=Attribute.NO_ACCESS,
+    )
+    
+    gyro = StructCharacteristic(
+        "<fff",
+        uuid=PhysBrykService.physbryk_service_uuid(0x102),
+        properties=(Characteristic.READ | Characteristic.NOTIFY),
+        write_perm=Attribute.NO_ACCESS,
+    )
+    """Tuple (x, y, z) float gyroscope values, in rad/s"""
+
 
 class ControlService(PhysBrykService):
     """TODO."""

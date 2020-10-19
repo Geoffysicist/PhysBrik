@@ -3,9 +3,9 @@ import time
 import adafruit_ble
 
 from physbryk import PhysBrykServerAdvertisement
-from physbryk import ControlService
-from physbryk import MotionService, MagnetService, EMRService, BatteryService
-from physbryk import DummyService, DummySensor
+from physbryk import CoreService
+# from physbryk import MotionService, MagnetService, EMRService, BatteryService
+# from physbryk import DummyService, DummySensor
 # from adafruit_ble_adafruit.temperature_service import TemperatureService
 
 # PyLint can't find BLERadio for some reason so special case it here.
@@ -28,12 +28,12 @@ while True:
     ble.stop_scan()
 
     if connection and connection.connected:
-        control_service = connection[ControlService]
-        control_service = connection[MotionService]
+        core_service = connection[CoreService]
+        # control_service = connection[MotionService]
         # control_service = connection[MagnetService]
         # control_service = connection[EMRService]
         # control_service = connection[BatteryService]
-        dummy_service = connection[DummyService]
+        # dummy_service = connection[DummyService]
 
         
         # print(connection._constructed_services.keys)
@@ -41,12 +41,12 @@ while True:
             
         
         
-        # while connection.connected:
+        while connection.connected:
         #     # print(adafruit_ble.decode_data(connection))
         #     print(connection.__dict__)
         #     print("Dummy value: ", dummy_service.value)
         #     print(f'type of {type(dummy_service)}')
-        #     print("Acceleration values: ", motion_service.acceleration)
+            print("Acceleration values: ", core_service.acceleration)
         #     print(f'Measurement period: {control_service.measurement_period}')
         #     control_service.measurement_period -= 5
         #     print(f'Measurement period: {control_service.measurement_period}')

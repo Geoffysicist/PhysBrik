@@ -19,9 +19,8 @@ async def print_services(mac_addr: str):
         svcs = await client.get_services()
         for s in svcs:
             print(s)
-            for c in s.characteristics: print(c)
-
-
+            for c in s.characteristics:
+                print(c.uuid)
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(scan())

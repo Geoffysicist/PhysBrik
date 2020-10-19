@@ -34,6 +34,7 @@ from adafruit_ble.advertising.standard import ManufacturerData, ManufacturerData
 from adafruit_ble.characteristics import Characteristic, StructCharacteristic
 from adafruit_ble.characteristics.int import Int32Characteristic, Int16Characteristic, Uint32Characteristic, Uint16Characteristic
 from adafruit_ble.characteristics.float import FloatCharacteristic
+from adafruit_ble.characteristics.string import StringCharacteristic, FixedStringCharacteristic
 from adafruit_ble.uuid import VendorUUID
 from adafruit_ble.services import Service
 from adafruit_ble.attributes import Attribute
@@ -43,7 +44,8 @@ from adafruit_ble_adafruit.adafruit_service import AdafruitService
 
 _MANUFACTURING_DATA_ADT = const(0xFF)
 _ADAFRUIT_COMPANY_ID = const(0x0822)
-_PID_DATA_ID = const(0x0001)  # This is the same as the Radio data id, unfortunately.
+# _PID_DATA_ID = const(0x0001)  # This is the same as the Radio data id, unfortunately.
+_PID_DATA_ID = const(0x0000)  # This is the same as the Radio data id, unfortunately.
 PHYSBRYK_UUID = 'a0d1839c-0eaa-5b52-bc84-818888dc7dc5'
 
 MEASUREMENT_PERIOD = 1000
@@ -92,10 +94,19 @@ class PhysBrykService(Service):
         return VendorUUID('a0d1{:04x}-0eaa-5b52-bc84-818888dc7dc5'.format(n))
 
     @classmethod
+    def name_charac(cls, name='PhysBryk Service'):
+        """Create a measurement_period Characteristic for use by a subclass."""
+        return StringCharacteristic(
+            uuid=cls.physbryk_service_uuid(0x0001),
+            write_perm=Attribute.NO_ACCESS,
+            initial_value=name,
+        )
+
+    @classmethod
     def measurement_period_charac(cls, msecs=MEASUREMENT_PERIOD):
         """Create a measurement_period Characteristic for use by a subclass."""
         return Int32Characteristic(
-            uuid=cls.physbryk_service_uuid(0x0001),
+            uuid=cls.physbryk_service_uuid(0x0002),
             properties=(Characteristic.READ | Characteristic.WRITE),
             initial_value=msecs,
         )
@@ -104,7 +115,7 @@ class PhysBrykService(Service):
     def service_version_charac(cls, version=1):
         """Create a service_version Characteristic for use by a subclass."""
         return Uint32Characteristic(
-            uuid=cls.physbryk_service_uuid(0x0002),
+            uuid=cls.physbryk_service_uuid(0x0003),
             properties=Characteristic.READ,
             write_perm=Attribute.NO_ACCESS,
             initial_value=version,
@@ -115,9 +126,12 @@ class MotionService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Accelerometer and Gyroscope values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x100)
+
+    name = PhysBrykService.name_charac(name='Motion')
+
     acceleration = StructCharacteristic(
         "<fff",
-        uuid=PhysBrykService.physbryk_service_uuid(0x101),
+        uuid=PhysBrykService.physbryk_service_uuid(0x102),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
@@ -125,7 +139,7 @@ class MotionService(PhysBrykService):  # pylint: disable=too-few-public-methods
 
     gyro = StructCharacteristic(
         "<fff",
-        uuid=PhysBrykService.physbryk_service_uuid(0x102),
+        uuid=PhysBrykService.physbryk_service_uuid(0x103),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
@@ -219,6 +233,9 @@ class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x1000)
+
+    name = PhysBrykService.name_charac(name='Dummy')
+
     value = Int16Characteristic(
         # "<h",
         uuid=PhysBrykService.physbryk_service_uuid(0x1001),
@@ -226,6 +243,8 @@ class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
         write_perm=Attribute.NO_ACCESS,
     )
     """Tuple (x, y, z) random values between 1 and 100"""
+
+    name = PhysBrykService.name_charac(name='Dummy')
 
     measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
@@ -243,7 +262,7 @@ class DummySensor(object):
     def update(self):
         """updates all the sensor values
         """
-        self.value = 42 # rn.randrange(16)
+        self.value = rn.randrange(256)
 
 
 def main():

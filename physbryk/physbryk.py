@@ -32,8 +32,9 @@ from micropython import const
 from adafruit_ble.advertising import Advertisement, LazyObjectField
 from adafruit_ble.advertising.standard import ManufacturerData, ManufacturerDataField
 from adafruit_ble.characteristics import Characteristic, StructCharacteristic
-from adafruit_ble.characteristics.int import Int32Characteristic, Uint32Characteristic, Uint16Characteristic
+from adafruit_ble.characteristics.int import Int32Characteristic, Int16Characteristic, Uint32Characteristic, Uint16Characteristic
 from adafruit_ble.characteristics.float import FloatCharacteristic
+from adafruit_ble.characteristics.string import StringCharacteristic, FixedStringCharacteristic
 from adafruit_ble.uuid import VendorUUID
 from adafruit_ble.services import Service
 from adafruit_ble.attributes import Attribute
@@ -41,12 +42,12 @@ from adafruit_ble import BLERadio
 
 from adafruit_ble_adafruit.adafruit_service import AdafruitService
 
-_MANUFACTURING_DATA_ADT = const(0xFF)
-_ADAFRUIT_COMPANY_ID = const(0x0822)
-_PID_DATA_ID = const(0x0001)  # This is the same as the Radio data id, unfortunately.
-PHYSBRYK_UUID = 'a0d1839c-0eaa-5b52-bc84-818888dc7dc5'
+# _MANUFACTURING_DATA_ADT = const(0xFF)
+# _ADAFRUIT_COMPANY_ID = const(0x0822)
+# _PID_DATA_ID = const(0x0001)  # This is the same as the Radio data id, unfortunately.
+PHYSBRYK_UUID = 'a0d10000-0eaa-5b52-bc84-818888dc7dc5'
 
-MEASUREMENT_PERIOD = 100
+MEASUREMENT_PERIOD = 1000
 
 class PhysBrykServerAdvertisement(Advertisement):
     """Advertise the Adafruit company ID and the board USB PID.
@@ -54,30 +55,45 @@ class PhysBrykServerAdvertisement(Advertisement):
     TODO find how to change this from the Adafruit one for a more general advertisement.
     """
 
-    match_prefixes = (
-        struct.pack(
-            "<BHBH",
-            _MANUFACTURING_DATA_ADT,
-            _ADAFRUIT_COMPANY_ID,
-            struct.calcsize("<HH"),
-            _PID_DATA_ID,
-        ),
-    )
-    manufacturer_data = LazyObjectField(
-        ManufacturerData,
-        "manufacturer_data",
-        advertising_data_type=_MANUFACTURING_DATA_ADT,
-        company_id=_ADAFRUIT_COMPANY_ID,
-        key_encoding="<H",
-    )
-    pid = ManufacturerDataField(_PID_DATA_ID, "<H")
-    """The USB PID (product id) for this board."""
+    # match_prefixes = (
+    #     struct.pack(
+    #         "<BHBH",
+    #         _MANUFACTURING_DATA_ADT,
+    #         _ADAFRUIT_COMPANY_ID,
+    #         struct.calcsize("<HH"),
+    #         _PID_DATA_ID,
+    #     ),
+    # )
+    # manufacturer_data = LazyObjectField(
+    #     ManufacturerData,
+    #     "manufacturer_data",
+    #     advertising_data_type=_MANUFACTURING_DATA_ADT,
+    #     company_id=_ADAFRUIT_COMPANY_ID,
+    #     key_encoding="<H",
+    # )
+    # pid = ManufacturerDataField(_PID_DATA_ID, "<H")
+    # """The USB PID (product id) for this board."""
 
     def __init__(self):
         super().__init__()
         self.connectable = True
         self.flags.general_discovery = True
         self.flags.le_only = True
+
+class PhysBryk(object):
+    
+    def __init__(self, device=None):
+        '''device is a PhysBryk BLE device'''
+        self._device = device
+    
+    def setDevice(self, ble_device):
+        self._device = ble_device
+        
+    def getAddress(self):
+        return self._device.address
+
+    def getName(self):
+        return self._device.name
 
 
 class PhysBrykService(Service):
@@ -92,10 +108,19 @@ class PhysBrykService(Service):
         return VendorUUID('a0d1{:04x}-0eaa-5b52-bc84-818888dc7dc5'.format(n))
 
     @classmethod
+    def name_charac(cls, name='PhysBryk Service'):
+        """Create a measurement_period Characteristic for use by a subclass."""
+        return StringCharacteristic(
+            uuid=cls.physbryk_service_uuid(0x0001),
+            write_perm=Attribute.NO_ACCESS,
+            initial_value=name,
+        )
+
+    @classmethod
     def measurement_period_charac(cls, msecs=MEASUREMENT_PERIOD):
         """Create a measurement_period Characteristic for use by a subclass."""
         return Int32Characteristic(
-            uuid=cls.physbryk_service_uuid(0x0001),
+            uuid=cls.physbryk_service_uuid(0x0002),
             properties=(Characteristic.READ | Characteristic.WRITE),
             initial_value=msecs,
         )
@@ -104,20 +129,32 @@ class PhysBrykService(Service):
     def service_version_charac(cls, version=1):
         """Create a service_version Characteristic for use by a subclass."""
         return Uint32Characteristic(
-            uuid=cls.physbryk_service_uuid(0x0002),
+            uuid=cls.physbryk_service_uuid(0x0003),
             properties=Characteristic.READ,
             write_perm=Attribute.NO_ACCESS,
             initial_value=version,
         )
 
+class ControlService(PhysBrykService):
+    """TODO."""
+
+    uuid = PhysBrykService.physbryk_service_uuid(0x000)
+
+    measurement_period = Int32Characteristic(
+        uuid=PhysBrykService.physbryk_service_uuid(0x0001),
+        properties=(Characteristic.READ | Characteristic.WRITE),
+        initial_value=MEASUREMENT_PERIOD,
+    )
+    """Initially 1000ms."""
 
 class MotionService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Accelerometer and Gyroscope values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x100)
+
     acceleration = StructCharacteristic(
         "<fff",
-        uuid=PhysBrykService.physbryk_service_uuid(0x101),
+        uuid=PhysBrykService.physbryk_service_uuid(0x102),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
@@ -125,20 +162,20 @@ class MotionService(PhysBrykService):  # pylint: disable=too-few-public-methods
 
     gyro = StructCharacteristic(
         "<fff",
-        uuid=PhysBrykService.physbryk_service_uuid(0x102),
+        uuid=PhysBrykService.physbryk_service_uuid(0x103),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
     """Tuple (x, y, z) float gyroscope values, in rad/s"""
-    measurement_period = PhysBrykService.measurement_period_charac()
-    """Initially 1000ms."""
 
+    # measurement_period = PhysBrykService.measurement_period_charac()
+    """Initially 1000ms."""
 
 class MagnetService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Magnetometer values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x200)
-    magnet = StructCharacteristic(
+    magnetic = StructCharacteristic(
         "<fff",
         uuid=PhysBrykService.physbryk_service_uuid(0x201),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
@@ -149,28 +186,29 @@ class MagnetService(PhysBrykService):  # pylint: disable=too-few-public-methods
     measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
 
-
 class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Light sensor value."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x300)
 
     intensity = FloatCharacteristic(
+        # "<f",
         uuid=PhysBrykService.physbryk_service_uuid(0x301),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Uncalibrated light level (float)"""
+    """Calculated valuefrom get_lux (float)"""
 
     spectrum = StructCharacteristic(
-        "<fff",
+        "<ffff",
         uuid=PhysBrykService.physbryk_service_uuid(0x302),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Tuple (r, g, b) red/green/blue color values, each in range 0-65535 (16 bits)"""
+    """Tuple (r, g, b, c) red/green/blue/clear color values, each in range 0-65535 (16 bits)"""
 
     proximity = Uint16Characteristic(
+        # "<H",
         uuid=PhysBrykService.physbryk_service_uuid(0x303),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
@@ -183,17 +221,32 @@ class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
     measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
 
+    @classmethod
+    def get_lux(cls, color_data):
+        """Calculate ambient light values"""
+        #   This only uses RGB ... how can we integrate clear or calculate lux
+        #   based exclusively on clear since this might be more reliable?
+        r, g, b, c = color_data
+        lux = (-0.32466 * r) + (1.57837 * g) + (-0.73191 * b)
+        return lux
 
 class BatteryService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x0000)
+
     voltage = FloatCharacteristic(
+        # "<f",
         uuid=PhysBrykService.physbryk_service_uuid(0x0001),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Tuple (x, y, z) random values between 1 and 100"""
+    """Voltage level (float)"""
+
+    @classmethod 
+    def get_voltage(cls, battery_sensor):
+        """Calculates the voltage from the reading of the on board battery sensor."""
+        return (battery_sensor.value * 3.3) / 65536 * 2
 
     measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
@@ -202,16 +255,17 @@ class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""
 
     uuid = PhysBrykService.physbryk_service_uuid(0x1000)
-    value = FloatCharacteristic(
+
+    value = Int16Characteristic(
+        # "<h",
         uuid=PhysBrykService.physbryk_service_uuid(0x1001),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
     """Tuple (x, y, z) random values between 1 and 100"""
 
-    measurement_period = PhysBrykService.measurement_period_charac()
+    # measurement_period = PhysBrykService.measurement_period_charac()
     """Initially 1000ms."""
-
 
 class DummySensor(object):
     """Creates a dummy sensor which generates a tuple of 3 random numbers.
@@ -225,11 +279,8 @@ class DummySensor(object):
     def update(self):
         """updates all the sensor values
         """
-        self.value = 42 # rn.randrange(16)
+        self.value = rn.randrange(256)
 
-def get_voltage(battery):
-    """Determines the voltage according to the value of the voltage monitor"""
-    return (battery.value * 3.3) / 65536 * 2
 
 def main():
     DEBUG = True
@@ -249,13 +300,14 @@ def main():
     import adafruit_apds9960.apds9960 # EMR
 
     import time
-    import analogio
-
+    
 
     dummy_sensor = DummySensor()
 
     if BOARD: # valid board present use real sensors
-        battery = battery = analogio.AnalogIn(board.VOLTAGE_MONITOR)
+        import analogio
+
+        battery = analogio.AnalogIn(board.VOLTAGE_MONITOR)
         motion = adafruit_lsm6ds.lsm6ds33.LSM6DS33(board.I2C())
         magnet = adafruit_lis3mdl.LIS3MDL(board.I2C())
         emr = adafruit_apds9960.apds9960.APDS9960(board.I2C())
@@ -288,7 +340,7 @@ def main():
         dummy_svc = mk.Service()
         adv = mk.Service()
 
-    ble.name = "PhysBryk"
+    ble.name = "PhysBryk_Alpha"
     
     last_update = 0
     
@@ -306,13 +358,13 @@ def main():
             now_msecs = time.monotonic_ns() // 1000000  # pylint: disable=no-member
 
             if now_msecs - last_update >= MEASUREMENT_PERIOD:
-                battery_svc.voltage = get_voltage(battery)
-                motion_svc.acceleration = motion.acceleration
-                motion_svc.gyro = motion.gyro
-                magnet_svc.magnet = magnet.magnet
-                r, g, b, c = emr.color_data
-                emr_svc.intensity = c
-                emr_svc.spectrum = (r, g, b)
+                battery_svc.voltage = battery_svc.get_voltage(battery)
+                motion_svc.acceleration = motion.acceleration # m/s/s
+                motion_svc.gyro = motion.gyro # rad/s
+                magnet_svc.magnetic = magnet.magnetic # microT
+
+                emr_svc.intensity = emr_svc.get_lux(emr.color_data)
+                emr_svc.spectrum = emr.color_data
                 emr_svc.proximity = emr.proximity
                 dummy_svc.value = 42
                 dummy_sensor.update()
@@ -321,10 +373,11 @@ def main():
                 if DEBUG:
                     print(f'motion acceleration: {motion_svc.acceleration}')
                     print(f'motion gyro: {motion_svc.gyro}')
-                    print(f'magnet magnet: {magnet_svc.magnet}')
+                    print(f'magnet magnet: {magnet_svc.magnetic}')
                     print(f'emr intensity: {emr_svc.intensity}')
                     print(f'emr spectrum: {emr_svc.spectrum}')
                     print(f'emr proximity: {emr_svc.proximity}')
+                    print(f'battery: {battery_svc.voltage}')
                     print(f'dummy: {dummy_svc.value}')
                 if not BOARD:
                     for s in mk.sensors: s.update()

@@ -93,7 +93,6 @@ class PhysBrykClient(object):
             if adv.complete_name and ("PhysBryk" in adv.complete_name):
                 print(f'Found {adv.complete_name}, connecting...')
                 self._connection = ble.connect(adv)
-                print(adv)
                 self._name = adv.complete_name
                 if self.connected():
                     self._core_service = self._connection[CoreService]
@@ -128,7 +127,7 @@ class PhysBrykClient(object):
     def getMeasurementPeriod(self):
         return self._measurement_period
 
-    def get_voltage(self):
+    def get_battery(self):
         """Calculates the voltage from the reading of the on board battery sensor."""
         return (self._core_service.battery * 3.3) / 65536 * 2
     

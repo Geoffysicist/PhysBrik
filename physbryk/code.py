@@ -4,7 +4,7 @@ from physbryk import CoreService
 from physbryk import DummySensor
 
 import board
-# import analogio
+import analogio
 import time
 import adafruit_lsm6ds.lsm6ds33 # motion
 import adafruit_lis3mdl #magnetometer
@@ -17,7 +17,7 @@ ble = BLERadio()
 i2c = board.I2C()
 
 # dummy_sensor = DummySensor()
-# battery = analogio.AnalogIn(board.VOLTAGE_MONITOR)
+battery = analogio.AnalogIn(board.VOLTAGE_MONITOR)
 motion = adafruit_lsm6ds.lsm6ds33.LSM6DS33(i2c)
 magnetometer = adafruit_lis3mdl.LIS3MDL(i2c)        
 adv = PhysBrykServerAdvertisement()
@@ -36,7 +36,7 @@ while True:
 
         if now_msecs - last_update >= core_service.measurement_period:
             # print(battery.value)
-            # core_service.battery = battery.value
+            core_service.battery = battery.value
             core_service.acceleration = motion.acceleration # m/s/s
             core_service.gyro = motion.gyro # rad/s
             core_service.magnetic = magnetometer.magnetic # uT

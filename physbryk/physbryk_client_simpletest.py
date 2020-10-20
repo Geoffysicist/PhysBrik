@@ -9,8 +9,9 @@ bryk.connect()
 
 while bryk.connected():
     print(f"Bryk name: {bryk.getName()}")
-    print("Bryk acceleration values: {:.2f} {:.2f} {:.2f}".format(*bryk.getAcceleration()))
-    print(f"Bryk net acceleration values: {bryk.getNetAcceleration():.3f}")
-    print("Bryk magnetometer values: {:.2f} {:.2f} {:.2f}".format(*bryk.getMagnetic()))
-    time.sleep(1)
+    print(f"Battery status {bryk.get_battery():.2f} V")
+    print("Bryk acceleration values: {:.2f} {:.2f} {:.2f} m/s/s".format(*bryk.getAcceleration()))
+    print(f"Bryk net acceleration values: {bryk.getNetAcceleration():.3f} m/s/s")
+    print("Bryk magnetometer values: {:.2f} {:.2f} {:.2f} rad/s".format(*bryk.getMagnetic()))
+    time.sleep(2)
 

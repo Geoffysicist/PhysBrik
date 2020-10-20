@@ -6,9 +6,8 @@ MotionService       100
 MagnetService 200
     magnet        201
 EMRService          300
-    intensity       301
-    spectrum        302
-    proximity       303
+    spectrum        301
+    proximity       302
 DummyService        1000
     value           1001
     
@@ -144,8 +143,18 @@ class PhysBrykClient(object):
     def getMagnetic(self):
         return self._core_service.magnetic
 
-    def record(self, data):
-        self._log.clear()
+    def get_lux(self):
+        """Calculate ambient light values"""
+        #   This only uses RGB ... how can we integrate clear or calculate lux
+        #   based exclusively on clear since this might be more reliable?
+        r, g, b, c = self._core_service.spectrum
+        lux = (-0.32466 * r) + (1.57837 * g) + (-0.73191 * b)
+        return lux
+
+    def get_spectrum(self):
+        '''the raw RGB values'''
+        r, g, b, c = self._core_service.spectrum
+        return (r, g, b)
 
 class PhysBrykServerAdvertisement(Advertisement):
     """Advertise theBryk.
@@ -242,78 +251,36 @@ class CoreService(PhysBrykService):
         initial_value=1,
     )
 
+    # Tuple (x, y, z) float magnetometer values, in micro-Teslas (uT)
     magnetic = StructCharacteristic(
         "<fff",
         uuid=PhysBrykService.physbryk_service_uuid(0x201),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Tuple (x, y, z) float magnetometer values, in micro-Teslas (uT)"""
 
-class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
-    """Light sensor value."""
+    # light 0300
+    light_enabled = Uint8Characteristic(
+        uuid = PhysBrykService.physbryk_service_uuid(0x300),
+        initial_value=1,
+    )
 
-    uuid = PhysBrykService.physbryk_service_uuid(0x300)
-
-    intensity = FloatCharacteristic(
-        # "<f",
+    # Tuple (r, g, b, c) red/green/blue/clear color values, each in range 0-65535 (16 bits)
+    spectrum = StructCharacteristic(
+        "<ffff",
         uuid=PhysBrykService.physbryk_service_uuid(0x301),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
+        initial_value=(0,0,0,0)
     )
-    """Calculated valuefrom get_lux (float)"""
 
-    spectrum = StructCharacteristic(
-        "<ffff",
+    # A higher number indicates a closer distance to the sensor. The value is unit-less.    
+    proximity = Uint16Characteristic(
+        # "<H",
         uuid=PhysBrykService.physbryk_service_uuid(0x302),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Tuple (r, g, b, c) red/green/blue/clear color values, each in range 0-65535 (16 bits)"""
-
-    proximity = Uint16Characteristic(
-        # "<H",
-        uuid=PhysBrykService.physbryk_service_uuid(0x303),
-        properties=(Characteristic.READ | Characteristic.NOTIFY),
-        write_perm=Attribute.NO_ACCESS,
-    )
-    """
-    A higher number indicates a closer distance to the sensor.
-    The value is unit-less.
-    """
-
-    measurement_period = PhysBrykService.measurement_period_charac()
-    """Initially 1000ms."""
-
-    @classmethod
-    def get_lux(cls, color_data):
-        """Calculate ambient light values"""
-        #   This only uses RGB ... how can we integrate clear or calculate lux
-        #   based exclusively on clear since this might be more reliable?
-        r, g, b, c = color_data
-        lux = (-0.32466 * r) + (1.57837 * g) + (-0.73191 * b)
-        return lux
-
-class BatteryService(PhysBrykService):  # pylint: disable=too-few-public-methods
-    """Random Data values."""
-
-    uuid = PhysBrykService.physbryk_service_uuid(0x0000)
-
-    voltage = FloatCharacteristic(
-        # "<f",
-        uuid=PhysBrykService.physbryk_service_uuid(0x0001),
-        properties=(Characteristic.READ | Characteristic.NOTIFY),
-        write_perm=Attribute.NO_ACCESS,
-    )
-    """Voltage level (float)"""
-
-    @classmethod 
-    def get_voltage(cls, battery_sensor):
-        """Calculates the voltage from the reading of the on board battery sensor."""
-        return (battery_sensor.value * 3.3) / 65536 * 2
-
-    measurement_period = PhysBrykService.measurement_period_charac()
-    """Initially 1000ms."""
 
 class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""

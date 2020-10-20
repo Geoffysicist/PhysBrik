@@ -26,6 +26,7 @@ physbryk_uuid.baseUUID('https://github.com/Geoffysicist/PhysBrykPy')
 
 import random as rn
 import struct
+import math
 
 from micropython import const
 
@@ -38,7 +39,7 @@ from adafruit_ble.characteristics.string import StringCharacteristic, FixedStrin
 from adafruit_ble.uuid import VendorUUID
 from adafruit_ble.services import Service
 from adafruit_ble.attributes import Attribute
-from adafruit_ble import BLERadio
+from adafruit_ble import BLERadio# , BLEConnection
 
 from adafruit_ble_adafruit.adafruit_service import AdafruitService
 
@@ -49,42 +50,13 @@ PHYSBRYK_UUID = 'a0d10000-0eaa-5b52-bc84-818888dc7dc5'
 
 MEASUREMENT_PERIOD = 1000
 
-class PhysBrykServerAdvertisement(Advertisement):
-    """Advertise the Adafruit company ID and the board USB PID.
-
-    TODO find how to change this from the Adafruit one for a more general advertisement.
-    """
-
-    # match_prefixes = (
-    #     struct.pack(
-    #         "<BHBH",
-    #         _MANUFACTURING_DATA_ADT,
-    #         _ADAFRUIT_COMPANY_ID,
-    #         struct.calcsize("<HH"),
-    #         _PID_DATA_ID,
-    #     ),
-    # )
-    # manufacturer_data = LazyObjectField(
-    #     ManufacturerData,
-    #     "manufacturer_data",
-    #     advertising_data_type=_MANUFACTURING_DATA_ADT,
-    #     company_id=_ADAFRUIT_COMPANY_ID,
-    #     key_encoding="<H",
-    # )
-    # pid = ManufacturerDataField(_PID_DATA_ID, "<H")
-    # """The USB PID (product id) for this board."""
-
-    def __init__(self):
-        super().__init__()
-        self.connectable = True
-        self.flags.general_discovery = True
-        self.flags.le_only = True
-
 class PhysBryk(object):
     
     def __init__(self, device=None):
         '''device is a PhysBryk BLE device'''
         self._device = device
+        self._connection = None
+        self._connected = False
     
     def setDevice(self, ble_device):
         self._device = ble_device
@@ -94,6 +66,97 @@ class PhysBryk(object):
 
     def getName(self):
         return self._device.name
+
+    def connected():
+        if self._connection:
+            self._connected = self._connection.connected
+        else:
+            self._connected = False
+        return self._connected
+
+class PhysBrykClient(object):
+    def __init__(self):
+        self._connection = None # a BLEConnection TODO change to a PhysBryk
+        self._connected = False
+        self._name = None
+        self._measurement_period = 1000
+        self._services = []
+        self._core_service = None
+        self._electrical_service = None
+
+        self._log = []
+
+    def connect(self):
+        print("Scanning for a PhysBryk Server advertisement...")
+        ble = BLERadio()  # pylint: disable=no-member
+        for adv in ble.start_scan(PhysBrykServerAdvertisement, timeout=10):
+            if adv.complete_name and ("PhysBryk" in adv.complete_name):
+                print(f'Found {adv.complete_name}, connecting...')
+                self._connection = ble.connect(adv)
+                self._name = adv.complete_name
+                
+                if self.connected():
+                    self._core_service = self._connection[CoreService]
+                    self._services.append(self._core_service)
+                    try: #TODO maybe move this checking to the server side
+                        self._electrical_service = self._connection[ElectricalService]
+                        self._services.append(self._electrical_service)
+                    except NameError:
+                        self._electrical_service = None
+                    print(f"{self.getName()} connected")
+                                
+                else:
+                    print(f'unable to connect to {self.getName()}')
+
+                break  # Stop scanning whether or not we are connected.
+        ble.stop_scan()
+
+    def connected(self):
+        '''Boolean described connection status.
+        '''
+        self._connected = self._connection.connected
+        return self._connected
+
+    def getName(self):
+        return self._name
+
+    def setMeasurementPeriod(self, period):
+        self._measurement_period = period
+        for s in self._services:
+            s.measurement_period = self._measurement_period
+
+    def getMeasurementPeriod(self):
+        return self._measurement_period
+
+    def get_voltage(self):
+        """Calculates the voltage from the reading of the on board battery sensor."""
+        return (self._core_service.battery * 3.3) / 65536 * 2
+    
+    def getAcceleration(self):
+        return self._core_service.acceleration
+
+    def getNetAcceleration(self):
+        acc_xzy = self._core_service.acceleration
+        acc_net = 0
+        for a in acc_xzy:
+            acc_net += a**2
+        return math.sqrt(acc_net)
+
+    def getMagnetic(self):
+        return self._core_service.magnetic
+
+    def record(self, data):
+        self._log.clear()
+
+class PhysBrykServerAdvertisement(Advertisement):
+    """Advertise theBryk.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.connectable = True
+        self.flags.general_discovery = True
+        self.flags.le_only = True
 
 class PhysBrykService(Service):
     """Common superclass for all PhysBryk board services."""
@@ -137,7 +200,8 @@ class PhysBrykService(Service):
 class CoreService(PhysBrykService):
     """Core, 'on-board' charactistics for the physbryk."""
 
-    uuid = PhysBrykService.physbryk_service_uuid(0x000)
+    #the bryk 0000
+    uuid = PhysBrykService.physbryk_service_uuid(0x0000)
 
     # Default period set by MEASUREMENT_PERIOD.
     measurement_period = Int32Characteristic(
@@ -145,14 +209,19 @@ class CoreService(PhysBrykService):
         properties=(Characteristic.READ | Characteristic.WRITE),
         initial_value=MEASUREMENT_PERIOD,
     )
+
+    battery = Uint16Characteristic(
+        uuid=PhysBrykService.physbryk_service_uuid(0x0002),
+        properties=(Characteristic.READ | Characteristic.NOTIFY),
+        write_perm=Attribute.NO_ACCESS,
+    )
     
     # motion sensor 0100
-    acceleration_enabled =  Uint8Characteristic(
+    motion_enabled =  Uint8Characteristic(
         uuid=PhysBrykService.physbryk_service_uuid(0x0100),
-        properties=(Characteristic.READ | Characteristic.WRITE),
-        initial_value=0,
+        initial_value=1,
     )
-    # Tuple (x, y, z) float acceleration values, in m/s^2
+    # Tuple (x, y, z) float acceleration values, in m/s/s
     acceleration = StructCharacteristic(
         "<fff",
         uuid=PhysBrykService.physbryk_service_uuid(0x101),
@@ -160,55 +229,20 @@ class CoreService(PhysBrykService):
         write_perm=Attribute.NO_ACCESS,
     )
     
+    # Tuple (x, y, z) float gyroscope values, in rad/s
     gyro = StructCharacteristic(
         "<fff",
         uuid=PhysBrykService.physbryk_service_uuid(0x102),
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
-    """Tuple (x, y, z) float gyroscope values, in rad/s"""
 
-
-class ControlService(PhysBrykService):
-    """TODO."""
-
-    uuid = PhysBrykService.physbryk_service_uuid(0x000)
-
-    measurement_period = Int32Characteristic(
-        uuid=PhysBrykService.physbryk_service_uuid(0x0001),
-        properties=(Characteristic.READ | Characteristic.WRITE),
-        initial_value=MEASUREMENT_PERIOD,
+    # magnetometer 0200
+    magnetic_enabled = Uint8Characteristic(
+        uuid = PhysBrykService.physbryk_service_uuid(0x200),
+        initial_value=1,
     )
-    """Initially 1000ms."""
 
-class MotionService(PhysBrykService):  # pylint: disable=too-few-public-methods
-    """Accelerometer and Gyroscope values."""
-
-    uuid = PhysBrykService.physbryk_service_uuid(0x100)
-
-    acceleration = StructCharacteristic(
-        "<fff",
-        uuid=PhysBrykService.physbryk_service_uuid(0x102),
-        properties=(Characteristic.READ | Characteristic.NOTIFY),
-        write_perm=Attribute.NO_ACCESS,
-    )
-    """Tuple (x, y, z) float acceleration values, in m/s^2"""
-
-    gyro = StructCharacteristic(
-        "<fff",
-        uuid=PhysBrykService.physbryk_service_uuid(0x103),
-        properties=(Characteristic.READ | Characteristic.NOTIFY),
-        write_perm=Attribute.NO_ACCESS,
-    )
-    """Tuple (x, y, z) float gyroscope values, in rad/s"""
-
-    # measurement_period = PhysBrykService.measurement_period_charac()
-    """Initially 1000ms."""
-
-class MagnetService(PhysBrykService):  # pylint: disable=too-few-public-methods
-    """Magnetometer values."""
-
-    uuid = PhysBrykService.physbryk_service_uuid(0x200)
     magnetic = StructCharacteristic(
         "<fff",
         uuid=PhysBrykService.physbryk_service_uuid(0x201),
@@ -216,9 +250,6 @@ class MagnetService(PhysBrykService):  # pylint: disable=too-few-public-methods
         write_perm=Attribute.NO_ACCESS,
     )
     """Tuple (x, y, z) float magnetometer values, in micro-Teslas (uT)"""
-    
-    measurement_period = PhysBrykService.measurement_period_charac()
-    """Initially 1000ms."""
 
 class EMRService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Light sensor value."""

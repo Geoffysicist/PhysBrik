@@ -39,7 +39,7 @@ from adafruit_ble.characteristics.string import StringCharacteristic, FixedStrin
 from adafruit_ble.uuid import VendorUUID
 from adafruit_ble.services import Service
 from adafruit_ble.attributes import Attribute
-from adafruit_ble import BLERadio# , BLEConnection
+from adafruit_ble import BLERadio # , BLEConnection
 
 from adafruit_ble_adafruit.adafruit_service import AdafruitService
 
@@ -93,8 +93,8 @@ class PhysBrykClient(object):
             if adv.complete_name and ("PhysBryk" in adv.complete_name):
                 print(f'Found {adv.complete_name}, connecting...')
                 self._connection = ble.connect(adv)
+                print(adv)
                 self._name = adv.complete_name
-                
                 if self.connected():
                     self._core_service = self._connection[CoreService]
                     self._services.append(self._core_service)

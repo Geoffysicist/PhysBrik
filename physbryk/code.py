@@ -20,8 +20,9 @@ from physbryk import CoreService
 from physbryk import DummySensor
 
 import board
-import analogio
+import analogio, audiobusio
 import time
+import array, math
 import adafruit_lsm6ds.lsm6ds33 # motion
 import adafruit_lis3mdl # magnetometer
 import adafruit_apds9960.apds9960 # light
@@ -40,6 +41,14 @@ motion = adafruit_lsm6ds.lsm6ds33.LSM6DS33(i2c)
 magnetometer = adafruit_lis3mdl.LIS3MDL(i2c)
 light = adafruit_apds9960.apds9960.APDS9960(i2c)
 light.enable_color = True
+microphone = audiobusio.PDMIn(board.MICROPHONE_CLOCK, board.MICROPHONE_DATA,
+                              sample_rate=16000, bit_depth=16)
+
+def normalized_rms(values):
+    minbuf = int(sum(values) / len(values))
+    return int(math.sqrt(sum(float(sample - minbuf) *
+                             (sample - minbuf) for sample in values) / len(values)))
+
 adv = PhysBrykServerAdvertisement()
 adv.complete_name = "PhysBrykAlpha"
 
@@ -61,6 +70,12 @@ while True:
         core_service.gyro = motion.gyro # rad/s
         core_service.magnetic = magnetometer.magnetic # uT
         core_service.spectrum = light.color_data
+
+        #the sound stuff - TODO see if this slows stuff down
+        sound_samples = array.array('H', [0] * 160)
+        microphone.record(sound_samples, len(sound_samples))
+
+        core_service.loudness = normalized_rms(sound_samples)
         # dummy_svc.value = dummy_sensor.value
         # dummy_sensor.update()
         # last_update = now_msecs

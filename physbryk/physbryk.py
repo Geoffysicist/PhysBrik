@@ -156,6 +156,11 @@ class PhysBrykClient(object):
         r, g, b, c = self._core_service.spectrum
         return (r, g, b)
 
+    def get_loudness(self):
+        '''the rms sound readings - TODO convert this to dB somehow.
+        '''
+        return self._core_service.loudness
+
 class PhysBrykServerAdvertisement(Advertisement):
     """Advertise theBryk.
     """
@@ -281,6 +286,21 @@ class CoreService(PhysBrykService):
         properties=(Characteristic.READ | Characteristic.NOTIFY),
         write_perm=Attribute.NO_ACCESS,
     )
+
+    # sound
+    sound_enabled = Uint8Characteristic(
+        uuid = PhysBrykService.physbryk_service_uuid(0x400),
+        initial_value=1,
+    )
+
+    loudness = Uint16Characteristic(
+        # "<H",
+        uuid=PhysBrykService.physbryk_service_uuid(0x402),
+        properties=(Characteristic.READ | Characteristic.NOTIFY),
+        write_perm=Attribute.NO_ACCESS,
+    )
+
+
 
 class DummyService(PhysBrykService):  # pylint: disable=too-few-public-methods
     """Random Data values."""

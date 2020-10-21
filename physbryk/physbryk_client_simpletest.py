@@ -27,6 +27,7 @@ while bryk.connected():
         print("Bryk magnetometer values: {:.2f} {:.2f} {:.2f} rad/s".format(*bryk.getMagnetic()))
         print(f"Bryk light intensity: {bryk.get_lux():.2f} lux")
         print("Bryk spectral values (RGB): {} {} {}".format(*bryk.get_spectrum()))
+        print(f"Bryk sound intensity: {bryk.get_loudness():.2f} ?dB")
         
         last_update = now_msecs
 

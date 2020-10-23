@@ -26,6 +26,9 @@ Base uuid: a0d1nnnn-0eaa-5b52-bc84-818888dc7dc5
 [ulab](https://learn.adafruit.com/ulab-crunch-numbers-fast-with-circuitpython): a numpy like library for faster data crunching
 
 ## Notes and resources
+
+[Adafruit feather footprints ofr pcbs](https://github.com/adafruit/Adafruit-FeatherWing-Proto-Doubler-Tripler-and-Quad)
+
 Prototype web app is [here on glitch](https://glitch.com/edit/#!/physbryk) but it is likely this will be abandoned in favour or an app based on jupyter
 
 Circuit diagrams and other stuff [here on lucidchart](https://lucid.app/invitations/accept/f6d50b76-4089-42c6-90ed-853e881d3e9f)

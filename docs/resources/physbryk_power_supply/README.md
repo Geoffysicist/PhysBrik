@@ -2,7 +2,7 @@
 
 [KiCad Library Convention](https://kicad-pcb.org/libraries/klc/)
 
-[Basics of Linear Fixed Resistors](file:///C:/Users/ggoldrick/Documents/GitHub/Geoffysicist/PhysBrykPy/docs/resources/power_supply/basics_of_linear_fixed_resistors.pdf)
+[Basics of Linear Fixed Resistors](https://github.com/Geoffysicist/PhysBrykPy/blob/consolidate_services/docs/resources/power_supply/basics_of_linear_fixed_resistors.pdf)
 
 [PCB Trace Width Calculator](https://www.7pcb.com/trace-width-calculator.php)
 

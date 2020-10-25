@@ -47,17 +47,6 @@ F 3 "~" V 6150 3260 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L physbryk_symbol:MountingHole_Pad H1
-U 1 1 5F9025E3
-P 7450 2600
-F 0 "H1" V 7404 2750 50  0000 L CNN
-F 1 "Banana Plug Vout" V 7495 2750 50  0000 L CNN
-F 2 "Connector:Banana_Jack_1Pin" H 7450 2600 50  0001 C CNN
-F 3 "~" H 7450 2600 50  0001 C CNN
-	1    7450 2600
-	0    1    1    0   
-$EndComp
-$Comp
 L Mechanical:MountingHole_Pad H2
 U 1 1 5F90361B
 P 7500 3100
@@ -85,7 +74,6 @@ F 3 "~" H 6700 3150 50  0001 C CNN
 	1    6700 3150
 	0    -1   1    0   
 $EndComp
-Connection ~ 6850 2600
 Wire Wire Line
 	6850 2900 6850 3150
 Connection ~ 6850 2900
@@ -135,26 +123,34 @@ F 3 "" H 6700 3300 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	6850 2600 7200 2600
-Wire Wire Line
 	7200 2450 7200 2600
-Connection ~ 7200 2600
+Connection ~ 6850 2600
 Wire Wire Line
-	7200 2600 7350 2600
-Wire Wire Line
-	7000 2250 6150 2250
-Wire Wire Line
-	6150 2250 6150 2600
-Connection ~ 6150 2600
+	6850 2600 7200 2600
 $Comp
 L physbryk_power_supply-rescue:Voltmeter_DC_LED-physbryk_symbol MES1
 U 1 1 5F925698
 P 7200 2250
 F 0 "MES1" H 7353 2296 50  0000 L CNN
-F 1 "Voltmeter_DC_LED" H 7353 2205 50  0000 L CNN
+F 1 "Volt_Ammeter" H 7353 2205 50  0000 L CNN
 F 2 "Connector_Wire:SolderWire-0.5sqmm_1x03_P4.8mm_D0.9mm_OD2.3mm" V 7200 2350 50  0001 C CNN
 F 3 "~" V 7200 2350 50  0001 C CNN
 	1    7200 2250
-	1    0    0    -1  
+	-1   0    0    -1  
 $EndComp
+$Comp
+L physbryk_symbol:MountingHole_Pad H1
+U 1 1 5F9025E3
+P 7500 2600
+F 0 "H1" H 7300 2600 50  0000 L CNN
+F 1 "Banana Plug Vout" H 6700 2700 50  0000 L CNN
+F 2 "Connector:Banana_Jack_1Pin" H 7500 2600 50  0001 C CNN
+F 3 "~" H 7500 2600 50  0001 C CNN
+	1    7500 2600
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	7500 2500 7500 2250
+Wire Wire Line
+	7500 2250 7400 2250
 $EndSCHEMATC

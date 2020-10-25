@@ -1,0 +1,30 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# Voltmeter_DC_LED-physbryk_symbol
+#
+DEF Voltmeter_DC_LED-physbryk_symbol MES 0 0 Y N 1 F N
+F0 "MES" 300 100 50 H V R CNN
+F1 "Voltmeter_DC_LED-physbryk_symbol" 800 -100 50 H V R CNN
+F2 "" 0 100 50 V I C CNN
+F3 "" 0 100 50 V I C CNN
+$FPLIST
+ Connector_Wire:SolderWire-0.5sqmm_1x03_P4.8mm_D0.9mm_OD2.3mm
+$ENDFPLIST
+DRAW
+C 0 0 100 0 1 10 N
+T 0 0 0 100 0 0 0 V Normal 0 C C
+P 2 0 0 0 -125 -125 -75 -75 N
+P 2 0 0 0 75 75 125 125 N
+P 3 0 0 0 75 125 125 125 125 75 N
+P 2 0 1 0 -20 -160 -20 -140 N
+P 2 0 1 0 -10 -150 -30 -150 N
+P 2 1 1 0 -160 20 -140 20 N
+P 2 1 1 0 -150 10 -150 30 N
+X gnd 1 0 200 100 D 50 50 1 1 P
+X Vtarget 2 0 -200 100 U 50 50 1 1 I
+X Vin 3 -200 0 100 R 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+#End Library

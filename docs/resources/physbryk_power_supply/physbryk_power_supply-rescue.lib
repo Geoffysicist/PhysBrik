@@ -1,6 +1,41 @@
 EESchema-LIBRARY Version 2.4
 #encoding utf-8
 #
+# Battery_Cell-physbryk_symbol
+#
+DEF Battery_Cell-physbryk_symbol BT 0 0 N N 1 F N
+F0 "BT" 100 100 50 H V L CNN
+F1 "Battery_Cell-physbryk_symbol" 100 0 50 H V L CNN
+F2 "" 0 60 50 V I C CNN
+F3 "" 0 60 50 V I C CNN
+DRAW
+S -90 70 90 60 0 1 0 F
+S -62 47 58 27 0 1 0 F
+P 2 0 1 0 0 30 0 0 N
+P 2 0 1 0 0 70 0 100 N
+P 2 0 1 10 20 135 60 135 N
+P 2 0 1 10 40 155 40 115 N
+X + 1 0 200 100 D 50 50 1 1 w
+X - 2 0 -100 100 U 50 50 1 1 w
+ENDDRAW
+ENDDEF
+#
+# MountingHole_Pad-physbryk_symbol
+#
+DEF MountingHole_Pad-physbryk_symbol H 0 40 N N 1 F N
+F0 "H" 0 250 50 H V C CNN
+F1 "MountingHole_Pad-physbryk_symbol" 0 175 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ MountingHole*Pad*
+$ENDFPLIST
+DRAW
+C 0 50 50 0 1 50 N
+X 1 1 0 -100 100 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
 # Voltmeter_DC_LED-physbryk_symbol
 #
 DEF Voltmeter_DC_LED-physbryk_symbol MES 0 0 Y N 1 F N

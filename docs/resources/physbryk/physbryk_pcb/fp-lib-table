@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name "Proto FeatherWing")(type KiCad)(uri "$(KIPRJMOD)/Proto FeatherWing.pretty")(options "")(descr ""))
+  (lib (name modules)(type KiCad)(uri "C:/Program Files/KiCad/share/kicad/modules")(options "")(descr ""))
+  (lib (name physbryk_pcb)(type KiCad)(uri ${KIPRJMOD}/physbryk_pcb.pretty)(options "")(descr ""))
+)

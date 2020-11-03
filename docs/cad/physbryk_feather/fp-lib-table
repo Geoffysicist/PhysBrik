@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name "Proto FeatherWing")(type KiCad)(uri "$(KIPRJMOD)/Proto FeatherWing.pretty")(options "")(descr ""))
+  (lib (name Connector_JST)(type KiCad)(uri ${KISYSMOD}/Connector_JST.pretty)(options "")(descr ""))
+  (lib (name physbryk)(type KiCad)(uri ${KIPRJMOD}/physbryk.pretty)(options "")(descr ""))
+)

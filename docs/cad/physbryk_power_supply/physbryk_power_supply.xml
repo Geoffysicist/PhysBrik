@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="D">
+  <design>
+    <source>C:\Users\ggoldrick\Documents\GitHub\Geoffysicist\PhysBrykPy\docs\resources\power_supply\physbryk_power_supply\physbryk_power_supply.sch</source>
+    <date>22/10/2020 9:43:31 AM</date>
+    <tool>Eeschema (5.1.7)-1</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>PhysBryk Power Supply </title>
+        <company/>
+        <rev>0.0.1</rev>
+        <date>2020-10-21</date>
+        <source>physbryk_power_supply.sch</source>
+        <comment number="1" value="9V Regulated"/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="R1">
+      <value>240</value>
+      <footprint>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F8FC534</tstamp>
+    </comp>
+    <comp ref="U1">
+      <value>LM317_TO-220</value>
+      <footprint>Package_TO_SOT_THT:TO-220-3_Vertical</footprint>
+      <datasheet>http://www.ti.com/lit/ds/symlink/lm317.pdf</datasheet>
+      <libsource lib="Regulator_Linear" part="LM317_TO-220" description="1.5A 35V Adjustable Linear Regulator, TO-220"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F8FD283</tstamp>
+    </comp>
+    <comp ref="BT1">
+      <value>9V</value>
+      <footprint>Connector_Wire:SolderWire-0.5sqmm_1x02_P4.8mm_D0.9mm_OD2.3mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="Battery_Cell" description="Single-cell battery"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F9008E3</tstamp>
+    </comp>
+    <comp ref="H1">
+      <value>Banana Plug Vout</value>
+      <footprint>Connector:Banana_Jack_1Pin</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Mechanical" part="MountingHole_Pad" description="Mounting Hole with connection"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F9025E3</tstamp>
+    </comp>
+    <comp ref="H2">
+      <value>Banana Plug Gnd</value>
+      <footprint>Connector:Banana_Jack_1Pin</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Mechanical" part="MountingHole_Pad" description="Mounting Hole with connection"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F90361B</tstamp>
+    </comp>
+    <comp ref="RV1">
+      <value>2.5K</value>
+      <footprint>Connector_Wire:SolderWire-0.5sqmm_1x03_P4.8mm_D0.9mm_OD2.3mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="R_POT" description="Potentiometer"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F90178B</tstamp>
+    </comp>
+    <comp ref="MES1">
+      <value>Voltmeter_DC</value>
+      <footprint>Connector_Wire:SolderWire-0.5sqmm_1x02_P4.8mm_D0.9mm_OD2.3mm</footprint>
+      <datasheet>~</datasheet>
+      <libsource lib="Device" part="Voltmeter_DC" description="DC voltmeter"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamp>5F90B9B4</tstamp>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Device" part="Battery_Cell">
+      <description>Single-cell battery</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">BT</field>
+        <field name="Value">Battery_Cell</field>
+      </fields>
+      <pins>
+        <pin num="1" name="+" type="passive"/>
+        <pin num="2" name="-" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~" type="passive"/>
+        <pin num="2" name="~" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R_POT">
+      <description>Potentiometer</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Potentiometer*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">RV</field>
+        <field name="Value">R_POT</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="Voltmeter_DC">
+      <description>DC voltmeter</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">MES</field>
+        <field name="Value">Voltmeter_DC</field>
+      </fields>
+      <pins>
+        <pin num="1" name="-" type="passive"/>
+        <pin num="2" name="+" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Mechanical" part="MountingHole_Pad">
+      <description>Mounting Hole with connection</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>MountingHole*Pad*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">H</field>
+        <field name="Value">MountingHole_Pad</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="Regulator_Linear" part="LM317_TO-220">
+      <aliases>
+        <alias>AZ1117T-ADJ</alias>
+      </aliases>
+      <description>1.5A 35V Adjustable Linear Regulator, TO-220</description>
+      <docs>http://www.ti.com/lit/ds/symlink/lm317.pdf</docs>
+      <footprints>
+        <fp>TO?220*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LM317_TO-220</field>
+        <field name="Footprint">Package_TO_SOT_THT:TO-220-3_Vertical</field>
+      </fields>
+      <pins>
+        <pin num="1" name="ADJ" type="input"/>
+        <pin num="2" name="VO" type="power_out"/>
+        <pin num="3" name="VI" type="power_in"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Device">
+      <uri>C:\Program Files\KiCad\share\kicad\library/Device.lib</uri>
+    </library>
+    <library logical="Mechanical">
+      <uri>C:\Program Files\KiCad\share\kicad\library/Mechanical.lib</uri>
+    </library>
+    <library logical="Regulator_Linear">
+      <uri>C:\Program Files\KiCad\share\kicad\library/Regulator_Linear.lib</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="Net-(RV1-Pad1)">
+      <node ref="RV1" pin="1"/>
+    </net>
+    <net code="2" name="Net-(R1-Pad1)">
+      <node ref="RV1" pin="3"/>
+      <node ref="R1" pin="1"/>
+      <node ref="U1" pin="1"/>
+    </net>
+    <net code="3" name="GND">
+      <node ref="MES1" pin="1"/>
+      <node ref="RV1" pin="2"/>
+      <node ref="H2" pin="1"/>
+      <node ref="BT1" pin="2"/>
+    </net>
+    <net code="4" name="Net-(H1-Pad1)">
+      <node ref="H1" pin="1"/>
+      <node ref="MES1" pin="2"/>
+      <node ref="U1" pin="2"/>
+      <node ref="R1" pin="2"/>
+    </net>
+    <net code="5" name="Net-(BT1-Pad1)">
+      <node ref="BT1" pin="1"/>
+      <node ref="U1" pin="3"/>
+    </net>
+  </nets>
+</export>

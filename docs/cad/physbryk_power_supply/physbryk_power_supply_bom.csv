@@ -1,0 +1,7 @@
+Reference, Value, Footprint, Datasheet
+"R1","240","Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal","~"
+"U1","LM317_TO-220","Package_TO_SOT_THT:TO-220-3_Vertical","http://www.ti.com/lit/ds/symlink/lm317.pdf"
+"BT1","9V","Connector_Wire:SolderWire-0.5sqmm_1x02_P4.8mm_D0.9mm_OD2.3mm","~"
+"H1","Banana Plug Vout","Connector:Banana_Jack_1Pin","~"
+"H2","Banana Plug Gnd","Connector:Banana_Jack_1Pin","~"
+"RV1","2.5K","Connector_Wire:SolderWire-0.5sqmm_1x02_P4.8mm_D0.9mm_OD2.3mm","~"

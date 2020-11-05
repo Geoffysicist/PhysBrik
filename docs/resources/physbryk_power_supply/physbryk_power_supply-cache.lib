@@ -1,0 +1,150 @@
+EESchema-LIBRARY Version 2.4
+#encoding utf-8
+#
+# Device_R
+#
+DEF Device_R R 0 0 N Y 1 F N
+F0 "R" 80 0 50 V V C CNN
+F1 "Device_R" 0 0 50 V V C CNN
+F2 "" -70 0 50 V I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ R_*
+$ENDFPLIST
+DRAW
+S -40 -100 40 100 0 1 10 N
+X ~ 1 0 150 50 D 50 50 1 1 P
+X ~ 2 0 -150 50 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# Device_R_POT
+#
+DEF Device_R_POT RV 0 40 Y N 1 F N
+F0 "RV" -175 0 50 V V C CNN
+F1 "Device_R_POT" -100 0 50 V V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ Potentiometer*
+$ENDFPLIST
+DRAW
+S 40 100 -40 -100 0 1 10 N
+P 2 0 1 0 100 0 60 0 N
+P 4 0 1 0 45 0 90 20 90 -20 45 0 F
+X 1 1 0 150 50 D 50 50 1 1 P
+X 2 2 150 0 50 L 50 50 1 1 P
+X 3 3 0 -150 50 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# Mechanical_MountingHole_Pad
+#
+DEF Mechanical_MountingHole_Pad H 0 40 N N 1 F N
+F0 "H" 0 250 50 H V C CNN
+F1 "Mechanical_MountingHole_Pad" 0 175 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ MountingHole*Pad*
+$ENDFPLIST
+DRAW
+C 0 50 50 0 1 50 N
+X 1 1 0 -100 100 U 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+# Regulator_Linear_LM317_TO-220
+#
+DEF Regulator_Linear_LM317_TO-220 U 0 10 Y Y 1 F N
+F0 "U" -150 125 50 H V C CNN
+F1 "Regulator_Linear_LM317_TO-220" 0 125 50 H V L CNN
+F2 "Package_TO_SOT_THT:TO-220-3_Vertical" 0 250 50 H I C CIN
+F3 "" 0 0 50 H I C CNN
+ALIAS AZ1117T-ADJ
+$FPLIST
+ TO?220*
+$ENDFPLIST
+DRAW
+S -200 75 200 -200 0 1 10 f
+X ADJ 1 0 -300 100 U 50 50 1 1 I
+X VO 2 300 0 100 L 50 50 1 1 w
+X VI 3 -300 0 100 R 50 50 1 1 W
+ENDDRAW
+ENDDEF
+#
+# physbryk_power_supply-rescue_Battery_Cell-physbryk_symbol
+#
+DEF physbryk_power_supply-rescue_Battery_Cell-physbryk_symbol BT 0 0 N N 1 F N
+F0 "BT" 100 100 50 H V L CNN
+F1 "physbryk_power_supply-rescue_Battery_Cell-physbryk_symbol" 100 0 50 H V L CNN
+F2 "" 0 60 50 V I C CNN
+F3 "" 0 60 50 V I C CNN
+DRAW
+S -90 70 90 60 0 1 0 F
+S -62 47 58 27 0 1 0 F
+P 2 0 1 0 0 30 0 0 N
+P 2 0 1 0 0 70 0 100 N
+P 2 0 1 10 20 135 60 135 N
+P 2 0 1 10 40 155 40 115 N
+X + 1 0 200 100 D 50 50 1 1 w
+X - 2 0 -100 100 U 50 50 1 1 w
+ENDDRAW
+ENDDEF
+#
+# physbryk_power_supply-rescue_MountingHole_Pad-physbryk_symbol
+#
+DEF physbryk_power_supply-rescue_MountingHole_Pad-physbryk_symbol H 0 40 N N 1 F N
+F0 "H" 0 250 50 H V C CNN
+F1 "physbryk_power_supply-rescue_MountingHole_Pad-physbryk_symbol" 0 175 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ MountingHole*Pad*
+$ENDFPLIST
+DRAW
+C 0 50 50 0 1 50 N
+X 1 1 0 -100 100 U 50 50 1 1 P
+ENDDRAW
+ENDDEF
+#
+# physbryk_power_supply-rescue_Voltmeter_DC_LED-physbryk_symbol
+#
+DEF physbryk_power_supply-rescue_Voltmeter_DC_LED-physbryk_symbol MES 0 0 Y N 1 F N
+F0 "MES" 300 100 50 H V R CNN
+F1 "physbryk_power_supply-rescue_Voltmeter_DC_LED-physbryk_symbol" 800 -100 50 H V R CNN
+F2 "" 0 100 50 V I C CNN
+F3 "" 0 100 50 V I C CNN
+$FPLIST
+ Connector_Wire:SolderWire-0.5sqmm_1x03_P4.8mm_D0.9mm_OD2.3mm
+$ENDFPLIST
+DRAW
+C 0 0 100 0 1 10 N
+T 0 0 0 100 0 0 0 V Normal 0 C C
+P 2 0 0 0 -125 -125 -75 -75 N
+P 2 0 0 0 75 75 125 125 N
+P 3 0 0 0 75 125 125 125 125 75 N
+P 2 0 1 0 -20 -160 -20 -140 N
+P 2 0 1 0 -10 -150 -30 -150 N
+P 2 1 1 0 -160 20 -140 20 N
+P 2 1 1 0 -150 10 -150 30 N
+X gnd 1 0 200 100 D 50 50 1 1 P
+X Vtarget 2 0 -200 100 U 50 50 1 1 I
+X Vin 3 -200 0 100 R 50 50 1 1 I
+ENDDRAW
+ENDDEF
+#
+# power_GND
+#
+DEF power_GND #PWR 0 0 Y Y 1 F P
+F0 "#PWR" 0 -250 50 H I C CNN
+F1 "power_GND" 0 -150 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+DRAW
+P 6 0 1 0 0 0 0 -50 50 -50 0 -100 -50 -50 0 -50 N
+X GND 1 0 0 0 D 50 50 1 1 W N
+ENDDRAW
+ENDDEF
+#
+#End Library

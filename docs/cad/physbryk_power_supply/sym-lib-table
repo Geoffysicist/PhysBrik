@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name physbryk_symbol)(type Legacy)(uri C:/Users/ggoldrick/Documents/GitHub/Geoffysicist/PhysBrykPy/docs/resources/physbryk_symbol.lib)(options "")(descr ""))
+  (lib (name physbryk_power_supply-rescue)(type Legacy)(uri ${KIPRJMOD}/physbryk_power_supply-rescue.lib)(options "")(descr ""))
+)

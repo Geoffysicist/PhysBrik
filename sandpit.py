@@ -1,9 +1,5 @@
-this_dict = {
-    0x0001: "SDP",
-    0x0003: "RFCOMM",
-    0x0005: "TCS-BIN"
-}
+import math
 
-for item in this_dict:
-    print(f'{item}, {this_dict[item]}')
- 
+tup = (1.2,2.4,3.8)
+result = round(tup)
+print(result)

@@ -38,8 +38,6 @@ Wire Wire Line
 Wire Wire Line
 	4700 5000 4700 4700
 Wire Wire Line
-	4600 5000 4600 4700
-Wire Wire Line
 	4400 5000 4400 4700
 Wire Wire Line
 	4300 5000 4300 4700
@@ -63,10 +61,6 @@ Wire Wire Line
 	5500 2600 5500 3000
 Wire Wire Line
 	5600 2600 5600 3000
-Wire Wire Line
-	5700 2600 5700 3000
-Wire Wire Line
-	5800 2600 5800 2900
 $Comp
 L Proto_FeatherWing-eagle-import:FRAME_A4_ADAFRUIT #U$1
 U 1 1 89E33A62
@@ -88,17 +82,6 @@ F 2 "Proto FeatherWing:FEATHERWING" H 4100 4500 50  0001 C CNN
 F 3 "" H 4100 4500 50  0001 C CNN
 	1    4100 4500
 	1    0    0    -1  
-$EndComp
-$Comp
-L Proto_FeatherWing-eagle-import:HEADER-1X16_76MIL JP3
-U 1 1 8182258E
-P 5100 5100
-F 0 "JP3" H 4850 5925 59  0000 L BNN
-F 1 "HEADER-1X16_76MIL" H 4850 4100 59  0000 L BNN
-F 2 "Proto FeatherWing:1X16_ROUND_76MIL" H 5100 5100 50  0001 C CNN
-F 3 "" H 5100 5100 50  0001 C CNN
-	1    5100 5100
-	0    1    1    0   
 $EndComp
 $Comp
 L Proto_FeatherWing-eagle-import:HEADER-1X1276MIL JP1
@@ -125,13 +108,13 @@ $EndComp
 $Comp
 L Connector:Conn_01x04_Male J1
 U 1 1 5FA6826D
-P 7250 3550
-F 0 "J1" H 7222 3432 50  0000 R CNN
-F 1 "Conn_01x04_Male" H 7222 3523 50  0000 R CNN
-F 2 "Connector_JST:JST_PH_S4B-PH-K_1x04_P2.00mm_Horizontal" H 7250 3550 50  0001 C CNN
-F 3 "~" H 7250 3550 50  0001 C CNN
-	1    7250 3550
-	-1   0    0    1   
+P 6850 3600
+F 0 "J1" H 6822 3482 50  0000 R CNN
+F 1 "Conn_01x04_Male" H 6822 3573 50  0000 R CNN
+F 2 "Connector_JST:JST_PH_S4B-PH-K_1x04_P2.00mm_Horizontal" H 6850 3600 50  0001 C CNN
+F 3 "~" H 6850 3600 50  0001 C CNN
+	1    6850 3600
+	1    0    0    -1  
 $EndComp
 Wire Wire Line
 	4350 1700 4800 1700
@@ -142,43 +125,56 @@ Wire Wire Line
 	3950 1800 3750 1800
 Wire Wire Line
 	3750 1800 3750 5300
-Wire Wire Line
-	3750 5300 4600 5300
-Wire Wire Line
-	4600 5300 4600 5000
 Connection ~ 4600 5000
 Wire Wire Line
-	5800 2900 7050 2900
+	4600 5000 4600 4700
 Wire Wire Line
-	7050 2900 7050 3350
+	4500 4700 4500 5000
+Wire Wire Line
+	3750 5300 4600 5300
+$Comp
+L Proto_FeatherWing-eagle-import:HEADER-1X16_76MIL JP3
+U 1 1 8182258E
+P 5100 5100
+F 0 "JP3" H 4850 5925 59  0000 L BNN
+F 1 "HEADER-1X16_76MIL" H 4850 4100 59  0000 L BNN
+F 2 "Proto FeatherWing:1X16_ROUND_76MIL" H 5100 5100 50  0001 C CNN
+F 3 "" H 5100 5100 50  0001 C CNN
+	1    5100 5100
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5800 2600 5800 2900
+Wire Wire Line
+	4600 5300 4600 5000
+Wire Wire Line
+	4600 5300 7050 5300
+Wire Wire Line
+	7050 5300 7050 3800
+Connection ~ 4600 5300
+Wire Wire Line
+	7050 3700 7150 3700
+Wire Wire Line
+	7150 3700 7150 5400
+Wire Wire Line
+	7150 5400 4400 5400
+Wire Wire Line
+	4400 5400 4400 5000
+Connection ~ 4400 5000
+Wire Wire Line
+	7050 3000 7050 3500
+Wire Wire Line
+	7050 3600 7150 3600
+Wire Wire Line
+	7150 3600 7150 2900
+Wire Wire Line
+	5700 2600 5700 3000
+Connection ~ 5700 3000
+Wire Wire Line
+	7150 2900 5800 2900
 Connection ~ 5800 2900
 Wire Wire Line
 	5800 2900 5800 3000
 Wire Wire Line
-	5700 3000 5700 3050
-Wire Wire Line
-	5700 3050 6900 3050
-Wire Wire Line
-	6900 3050 6900 3450
-Wire Wire Line
-	6900 3450 7050 3450
-Connection ~ 5700 3000
-Wire Wire Line
-	4500 5550 6600 5550
-Wire Wire Line
-	6600 5550 6600 3550
-Wire Wire Line
-	6600 3550 7050 3550
-Wire Wire Line
-	4500 4700 4500 5000
-Connection ~ 4500 5000
-Wire Wire Line
-	4500 5000 4500 5550
-Wire Wire Line
-	4600 5300 6850 5300
-Wire Wire Line
-	6850 5300 6850 3650
-Wire Wire Line
-	6850 3650 7050 3650
-Connection ~ 4600 5300
+	5700 3000 7050 3000
 $EndSCHEMATC

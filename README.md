@@ -36,6 +36,8 @@ Circuit diagrams and other stuff [here on lucidchart](https://lucid.app/invitati
 
 For the Arduino version see [PhysBrykC](https://github.com/Geoffysicist/PhysBrykC) though this may also be abandoned
 
+
+
 ## TODO
 See the [github repo projects](https://github.com/Geoffysicist/PhysBrykPy/projects)
 
@@ -52,3 +54,5 @@ See the [github repo projects](https://github.com/Geoffysicist/PhysBrykPy/projec
 - [Adafruit BMP280 Library](https://circuitpython.readthedocs.io/projects/bmp280/en/latest/)
 - [Adafruit INA260 Library](https://circuitpython.readthedocs.io/projects/ina260/en/latest/index.html)
 
+## Other Stuff
+- [3d printed accessories for hot wheels go pro](https://www.thingiverse.com/thing:3049521)

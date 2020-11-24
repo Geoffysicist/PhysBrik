@@ -1,4 +1,8 @@
-# 9V battery powered regulated power supply
+# Bench powered regulated power supply
+
+Orihinally this was to be build using KiCad but has been moved to easyEDA
+
+[Project home on OSHWLab](https://oshwlab.com/Prof_Stick)
 
 [KiCad Library Convention](https://kicad-pcb.org/libraries/klc/)
 

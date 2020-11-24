@@ -24,6 +24,7 @@ Base uuid: a0d1nnnn-0eaa-5b52-bc84-818888dc7dc5
 
 ## Other helper guides
 [ulab](https://learn.adafruit.com/ulab-crunch-numbers-fast-with-circuitpython): a numpy like library for faster data crunching
+[Surface Mount is Easy](https://geoffg.net/SurfaceMount.html)
 
 ## Notes and resources
 
